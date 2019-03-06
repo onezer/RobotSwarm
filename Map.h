@@ -1,6 +1,7 @@
 #pragma once
 #include <atomic>
 #include "MapGenerator.h"
+#include <mutex>
 
 class Map
 {
@@ -10,6 +11,7 @@ class Map
 	int* size;
 	int dimensions;
 	
+	mutable std::mutex m_Move;
 
 public:
 	enum nodeType {Free, Obstacle, Robot};

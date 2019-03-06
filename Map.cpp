@@ -58,18 +58,21 @@ int Map::Move(int * position, direction direction)
 
 	int* newPos = Transform(position, direction);
 	if(!newPos){
-		return 2;
+		return 2; // movement out of range
 	}
 
+	m_Move.lock();
 	if (getNode(newPos) == nodeType::Free) {
 		setNode(newPos, nodeType::Robot);
 		setNode(position, nodeType::Free);
 		CopyPos(newPos, position);
 	}
 	else {
+		m_Move.unlock();
 		delete[] newPos;
 		return 1;
 	}
+	m_Move.unlock();
 
 	delete[] newPos;
 	return 0;
@@ -171,15 +174,19 @@ void Map::setNode(int * position, nodeType type)
 
 int * Map::Transform(int * position, direction direction) const
 {
+	if (ValidPos(position)) {
+		throw new std::invalid_argument("Transform: Invalid position, out of range!");
+	}
+
 	int* newPos = new int[dimensions];
 
 	for (int i = 0; i < dimensions; ++i) {
 		newPos[i] = position[i];
 	}
 
-	if (
-		(maptype == mapType::twoD)
-		)
+	if (!ValidDir(direction)) {
+		throw new std::invalid_argument("Transform: Invalid direction!");
+	}
 
 	switch (direction) {
 	case North: newPos[1] += 1; break;
@@ -188,10 +195,16 @@ int * Map::Transform(int * position, direction direction) const
 	case East: newPos[0] += 1; break;
 	case Up: newPos[2] += 1; break;
 	case Down: newPos[2] -= 1; break;
-	case NorthWest: newPos[1] += 1; break;
-	case NorthEast: newPos[2] += 1; break;
+	case NorthWest: 
+		newPos[1] += 1;
+		newPos[0] -= 1;
+		break;
+	case NorthEast: newPos[1] += 1; break;
 	case SouthWest: newPos[1] -= 1; break;
-	case SouthEast: newPos[2] -= 1; break;
+	case SouthEast:
+		newPos[1] -= 1;
+		newPos[0] += 1;
+		break;
 	}
 
 	if (ValidPos(newPos)) {
