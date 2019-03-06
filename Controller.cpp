@@ -28,6 +28,9 @@ Controller::Controller()
 		threads_done[i] = 0;
 	}
 
+	map = Map::Instance();
+	mapGenerator = MapGenerator::Instance();
+
 	workers = new std::thread[worker_num];
 
 	robotList = new std::list<Robot>[worker_num];
@@ -46,7 +49,7 @@ void Controller::worker(int id, std::list<Robot>* robotList)
 			switch (task) {
 			case Look: (*it).Look(); break;
 			case Compute: (*it).Compute(); break;
-			case Move: (*it).Move(); if ((*it).move == 10000) { terminate = true; } break;
+			case Move: (*it).Move(); break;
 			}
 		}
 	};
@@ -128,6 +131,7 @@ Controller * Controller::Instance()
 
 void Controller::WriteRobots() const
 {
+	/*
 	m_write.lock();
 	for (int i = 0; i < worker_num; ++i) {
 		int j = 0;
@@ -138,14 +142,23 @@ void Controller::WriteRobots() const
 			j++;
 		}
 	}
-	m_write.unlock();
+	m_write.unlock(); */
 }
 
 void Controller::AddRobots(unsigned int number)
 {
+	int* position;
+	int dimensions = map->getDimensions();
+
 	for (int i = 0; i < number; ++i) {
 		unsigned int count = Robot::getCount();
-		robotList[count % worker_num].push_back(*(new Robot(count)));
+
+		position = new int[dimensions];
+		for (int i = 0; i < dimensions; ++i) {
+			position[i] = 0;
+		}
+
+		robotList[count % worker_num].push_back(*(new Robot(count, position)));
 	}
 }
 

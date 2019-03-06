@@ -7,11 +7,13 @@
 #include<time.h>
 #include"Robot.h"
 #include"Controller.h"
+#include"Map.h"
 
-int main() {
+int main() { 
+
 	Controller* controller = Controller::Instance();
 
-	controller->AddRobots(70);
+	controller->AddRobots(1100);
 
 	auto start = std::chrono::steady_clock::now();
 
@@ -33,6 +35,7 @@ int main() {
 
 	//std::cout << "Robot count: " << Robot::getCount() << std::endl;
 
-	std::cout << "DONE\n" << "Simulation time: " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " microseconds\n";
+	std::cout << "DONE\n" << "Simulation time: " << std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << " seconds\n"; 
+
 	std::getchar();
 }

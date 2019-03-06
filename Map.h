@@ -27,7 +27,6 @@ public:
 	int PlaceRobot(int* position);
 	int RemoveRobot(int* position);
 
-	Map();
 	~Map();
 
 private:
