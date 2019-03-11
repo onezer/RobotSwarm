@@ -55,7 +55,9 @@ int Map::Move(int * position, direction direction)
 		throw new std::invalid_argument{ "Robot Move: invalid robot position, it's not a robot's position!" };
 	}
 
-	int* newPos = Transform(position, direction);
+	int newPos[3];
+
+	Transform(position, direction, newPos);
 	if(!newPos){
 		return 2; // movement out of range
 	}
@@ -68,12 +70,10 @@ int Map::Move(int * position, direction direction)
 	}
 	else {
 		m_Move.unlock();
-		delete[] newPos;
-		return 1; //not a robot's position
+		return 1; //collision
 	}
 	m_Move.unlock();
 
-	delete[] newPos;
 	return 0;
 }
 
@@ -91,17 +91,16 @@ int Map::Look(int * position, direction direction)
 		throw new std::invalid_argument{ "Robot Look: invalid robot position, it's not a robot's position!" };
 	}
 
-	int* newPos = Transform(position, direction);
+	int newPos[3];
+
+	Transform(position, direction, newPos);
 	if (!newPos) {
 		return nodeType::Obstacle;
 	}
 
 	int node = getNode(newPos);
 
-	delete[] newPos;
-
 	return node;
-
 }
 
 int Map::PlaceRobot(int * position)
@@ -175,7 +174,7 @@ void Map::setNode(int * position, nodeType type)
 	}
 }
 
-int * Map::Transform(int * position, direction direction) const
+void Map::Transform(int * position, direction direction, int* newPosition) const
 {
 	if (!ValidPos(position)) {
 		throw new std::invalid_argument("Transform: Invalid position, out of range!");
@@ -185,36 +184,25 @@ int * Map::Transform(int * position, direction direction) const
 		throw new std::invalid_argument("Transform: Invalid direction!");
 	}
 
-	int* newPos = new int[dimensions];
-
-	for (int i = 0; i < dimensions; ++i) {
-		newPos[i] = position[i];
-	}
+	CopyPos(position, newPosition);
 
 	switch (direction) {
-	case North: newPos[1] += 1; break;
-	case South: newPos[1] -= 1; break;
-	case West: newPos[0] -= 1; break;
-	case East: newPos[0] += 1; break;
-	case Up: newPos[2] += 1; break;
-	case Down: newPos[2] -= 1; break;
+	case North: newPosition[1] += 1; break;
+	case South: newPosition[1] -= 1; break;
+	case West: newPosition[0] -= 1; break;
+	case East: newPosition[0] += 1; break;
+	case Up: newPosition[2] += 1; break;
+	case Down: newPosition[2] -= 1; break;
 	case NorthWest: 
-		newPos[1] += 1;
-		newPos[0] -= 1;
+		newPosition[1] += 1;
+		newPosition[0] -= 1;
 		break;
-	case NorthEast: newPos[1] += 1; break;
-	case SouthWest: newPos[1] -= 1; break;
+	case NorthEast: newPosition[1] += 1; break;
+	case SouthWest: newPosition[1] -= 1; break;
 	case SouthEast:
-		newPos[1] -= 1;
-		newPos[0] += 1;
+		newPosition[1] -= 1;
+		newPosition[0] += 1;
 		break;
-	}
-
-	if (ValidPos(newPos)) {
-		return newPos;
-	}
-	else {
-		return nullptr;
 	}
 }
 

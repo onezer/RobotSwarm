@@ -37,7 +37,7 @@ private:
 	bool ValidPos(int* position) const;
 	int getNode(int* position) const;
 	void setNode(int* position, nodeType type);
-	int* Transform(int* position, direction direction) const;
+	void Transform(int* position, direction direction, int* newPosition) const;
 	void CopyPos(int* source, int* target) const;
 	bool ValidDir(direction direction) const;
 };
