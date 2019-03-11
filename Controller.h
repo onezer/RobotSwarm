@@ -1,10 +1,14 @@
 #pragma once
+
+
 #include"Robot.h"
-#include<atomic>
-#include<list>
-#include<mutex>
 #include"Map.h"
 #include"MapGenerator.h"
+#include<atomic>
+#include<thread>
+#include<mutex>
+#include<iostream>
+#include<list>
 
 class Controller
 {
@@ -34,4 +38,3 @@ public:
 	int getWorkerNum() const;
 
 };
-

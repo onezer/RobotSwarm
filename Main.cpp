@@ -8,8 +8,7 @@
 #include"Robot.h"
 #include"Controller.h"
 #include"Map.h"
-
-int main() { 
+/*int main() { 
 
 	Controller* controller = Controller::Instance();
 
@@ -38,4 +37,4 @@ int main() {
 	std::cout << "DONE\n" << "Simulation time: " << std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << " seconds\n"; 
 
 	std::getchar();
-}
+} */

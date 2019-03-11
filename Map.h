@@ -1,12 +1,13 @@
 #pragma once
 #include <atomic>
-#include "MapGenerator.h"
 #include <mutex>
+
+
 
 class Map
 {
 	Map();
-	std::atomic_int* MapArray;
+	void* MapArray;
 	static Map* s_instance;
 	int* size;
 	int dimensions;
@@ -19,7 +20,7 @@ public:
 	enum mapType { twoD, threeD, hex };
 
 	static Map* Instance();
-	void SetMap(std::atomic_int* MapArray, mapType maptype, int* size);
+	void SetMap(void* MapArray, mapType maptype, int* size);
 	int getDimensions() const;
 	int getType() const;
 	const int* getSize() const;
@@ -40,4 +41,3 @@ private:
 	void CopyPos(int* source, int* target) const;
 	bool ValidDir(direction direction) const;
 };
-

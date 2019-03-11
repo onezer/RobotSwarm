@@ -1,9 +1,4 @@
 #include "Map.h"
-#include<iostream>
-#include<atomic>
-#include<exception>
-
-
 
 Map * Map::Instance()
 {
@@ -12,17 +7,21 @@ Map * Map::Instance()
 	return s_instance;
 }
 
-void Map::SetMap(std::atomic_int * MapArray, mapType maptype, int* size)
+void Map::SetMap(void* MapArray, mapType maptype, int* size)
 {
 	this->MapArray = MapArray;
-	this->size = size;
 	this->maptype = maptype;
+
 	switch (maptype) {
 	case twoD: dimensions = 2; break;
 	case threeD: dimensions = 3; break;
-	case hex: dimensions = 3; break;
+	case hex: dimensions = 2; break;
 	default: throw new std::invalid_argument("SetMap: Wrong maptype!"); break;
 	}
+
+	int* mySize = new int[dimensions];
+	CopyPos(size, mySize);
+	this->size = mySize;
 }
 
 int Map::getDimensions() const
@@ -44,7 +43,7 @@ const int* Map::getSize() const
 
 int Map::Move(int * position, direction direction)
 {
-	if (!ValidDir) {
+	if (!ValidDir(direction)) {
 		throw new std::invalid_argument("Robot Move: invalid direction!");
 	}
 
@@ -70,7 +69,7 @@ int Map::Move(int * position, direction direction)
 	else {
 		m_Move.unlock();
 		delete[] newPos;
-		return 1;
+		return 1; //not a robot's position
 	}
 	m_Move.unlock();
 
@@ -80,7 +79,7 @@ int Map::Move(int * position, direction direction)
 
 int Map::Look(int * position, direction direction)
 {
-	if (!ValidDir) {
+	if (!ValidDir(direction)) {
 		throw new std::invalid_argument("Robot Look: invalid direction!");
 	}
 
@@ -155,37 +154,41 @@ int Map::getNode(int * position) const
 	}
 
 	if (dimensions == 2) {
-		return MapArray[position[0], position[1]];
+		return ((std::atomic_int**)MapArray)[position[0]][position[1]];
 	}
 	else {
-		return MapArray[position[0], position[1], position[2]];
+		return ((std::atomic_int***)MapArray)[position[0]][position[1]][position[2]];
 	}
 }
 
 void Map::setNode(int * position, nodeType type)
 {
+	if (!ValidPos(position)) {
+		throw new std::invalid_argument("SetNode: Invalid position!");
+	}
+
 	if (dimensions == 2) {
-		MapArray[position[0], position[1]] = type;
+		((std::atomic_int**)MapArray)[position[0]][position[1]] = type;
 	}
 	else {
-		MapArray[position[0], position[1], position[2]] = type;
+		((std::atomic_int***)MapArray)[position[0]][position[1]][position[2]] = type;
 	}
 }
 
 int * Map::Transform(int * position, direction direction) const
 {
-	if (ValidPos(position)) {
+	if (!ValidPos(position)) {
 		throw new std::invalid_argument("Transform: Invalid position, out of range!");
+	}
+
+	if (!ValidDir(direction)) {
+		throw new std::invalid_argument("Transform: Invalid direction!");
 	}
 
 	int* newPos = new int[dimensions];
 
 	for (int i = 0; i < dimensions; ++i) {
 		newPos[i] = position[i];
-	}
-
-	if (!ValidDir(direction)) {
-		throw new std::invalid_argument("Transform: Invalid direction!");
 	}
 
 	switch (direction) {

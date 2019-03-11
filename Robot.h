@@ -1,7 +1,9 @@
 #pragma once
 #include <atomic>
-#include "Map.h"
 #include<iostream>
+#include<atomic>
+#include "Map.h"
+#include"Controller.h"
 
 class Robot
 {
@@ -27,4 +29,3 @@ public:
 	Robot(unsigned int id, int* position);
 	~Robot();
 };
-

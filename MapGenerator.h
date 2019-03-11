@@ -1,5 +1,4 @@
 #pragma once
-#include<string>
 #include"Map.h"
 class MapGenerator
 {
@@ -12,4 +11,3 @@ public:
 	int* GenerateMap(Map::mapType type, int* size, bool randomSeed, std::string seed="");
 	~MapGenerator();
 };
-

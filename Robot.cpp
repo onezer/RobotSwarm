@@ -1,6 +1,5 @@
 #include "Robot.h"
-#include<atomic>
-#include"Controller.h"
+
 
 std::_Atomic_uint Robot::count;
 
@@ -19,7 +18,6 @@ Robot::Robot(unsigned int id, int* position) : ID{ id }, position{position}
 Robot::~Robot()
 {
 	delete[] position;
-	delete[] lookData;
 	--count;
 }
 

@@ -1,10 +1,4 @@
-
 #include "Controller.h"
-#include<atomic>
-#include<thread>
-#include<mutex>
-#include<iostream>
-#include<list>
 
 
 Controller* Controller::s_instance;
