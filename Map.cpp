@@ -58,7 +58,7 @@ int Map::Move(int * position, direction direction)
 	int newPos[3];
 
 	Transform(position, direction, newPos);
-	if(!newPos){
+	if(!ValidPos(newPos)){
 		return 2; // movement out of range
 	}
 
@@ -94,7 +94,7 @@ int Map::Look(int * position, direction direction)
 	int newPos[3];
 
 	Transform(position, direction, newPos);
-	if (!newPos) {
+	if (!ValidPos(newPos)) {
 		return nodeType::Obstacle;
 	}
 
