@@ -1,8 +1,8 @@
 #pragma once
-#include"Robot.h"
-#include<atomic>
 #include<list>
-#include<mutex>
+#include"Map.h"
+#include"Robot.h"
+#include"MapGenerator.h"
 
 class Controller
 {
@@ -15,10 +15,9 @@ class Controller
 	static std::mutex m_write;
 	static std::mutex m_iter;
 	static std::list<Robot>* robotList;
-	
+	Map* map;
+	MapGenerator* mapGenerator;
 	static bool terminate;
-	
-
 	static Controller* s_instance;
 
 	static void worker(int id, std::list<Robot>* robotList);
@@ -33,4 +32,3 @@ public:
 	int getWorkerNum() const;
 
 };
-

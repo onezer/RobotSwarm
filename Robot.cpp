@@ -1,33 +1,84 @@
 #include "Robot.h"
-#include<atomic>
 #include"Controller.h"
+
 
 std::_Atomic_uint Robot::count;
 
-Robot::Robot(unsigned int id) : ID{ id }, look{0}, compute{0}, move{0}
+Robot::Robot(unsigned int id, int* position) : ID{ id }, position{position}
 {
+	map = Map::Instance();
+	controller = Controller::Instance();
+	for (int i = 0; i < 10; ++i) {
+		lookData[i] = -1;
+	}
+
 	++count;
 }
 
 
 Robot::~Robot()
 {
+	delete[] position;
 	--count;
+}
+
+void Robot::Move(Map::direction direction)
+{
+	try {
+		int result = map->Move(position, direction);
+		if (result != 0) {
+			controller->TerminateSimulation();
+			std::cout << "Simulation terminated: Robot with ID:" << ID << " collided!\n";
+		}
+	}
+	catch (std::invalid_argument& e) {
+		std::cout << e.what();
+	}
+}
+
+void Robot::Look(Map::direction direction)
+{
+	try {
+		lookData[direction] = map->Look(position, direction);
+	}
+	catch (std::invalid_argument& e) {
+		std::cout << e.what();
+	}
 }
 
 void Robot::Look()
 {
-	++look;
+	Look(Map::direction::North);
+	Look(Map::direction::East);
+	Look(Map::direction::West);
+	Look(Map::direction::South);
 }
 
 void Robot::Compute()
 {
-	++compute;
+	std::cout << position[0] << " " << position[1] << std::endl;
+
+	if (lookData[Map::direction::North] == 0 && lookData[Map::direction::West] == 1) {
+		nextMove = Map::direction::North;
+	} 
+	else if (lookData[Map::direction::East] == 0 && lookData[Map::direction::North] == 1) {
+		nextMove = Map::direction::East;
+	}
+	else if (lookData[Map::direction::South] == 0 && lookData[Map::direction::East] == 1) {
+		nextMove = Map::direction::South;
+	}
+	else if (lookData[Map::direction::West] == 0 && lookData[Map::direction::South] == 1) {
+		nextMove = Map::direction::West;
+	}
+
+	if (position[0] == 1 && position[1] == 0) {
+		controller->TerminateSimulation();
+	}
 }
 
 void Robot::Move()
 {
-	++move;
+	Move(nextMove);
 }
 
 const std::_Atomic_uint Robot::getCount()

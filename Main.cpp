@@ -5,13 +5,13 @@
 #include<chrono>
 #include<atomic>
 #include<time.h>
-#include"Robot.h"
 #include"Controller.h"
+#include"MapGenerator.h"
+int main() { 
 
-int main() {
 	Controller* controller = Controller::Instance();
 
-	controller->AddRobots(70);
+	controller->AddRobots(1);
 
 	auto start = std::chrono::steady_clock::now();
 
@@ -29,10 +29,9 @@ int main() {
 
 	auto end = std::chrono::steady_clock::now();
 
-	controller->WriteRobots();
+	
 
-	//std::cout << "Robot count: " << Robot::getCount() << std::endl;
+	std::cout << "DONE\n" << "Simulation time: " << std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << " seconds\n"; 
 
-	std::cout << "DONE\n" << "Simulation time: " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " microseconds\n";
 	std::getchar();
 }

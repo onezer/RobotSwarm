@@ -1,10 +1,4 @@
-
 #include "Controller.h"
-#include<atomic>
-#include<thread>
-#include<mutex>
-#include<iostream>
-#include<list>
 
 
 Controller* Controller::s_instance;
@@ -28,11 +22,34 @@ Controller::Controller()
 		threads_done[i] = 0;
 	}
 
+	map = Map::Instance();
+	mapGenerator = MapGenerator::Instance();
+
 	workers = new std::thread[worker_num];
 
 	robotList = new std::list<Robot>[worker_num];
 
 	terminate = false;
+
+	//The MapGenerator will be used here
+	int size[] = { 10,10 };
+	std::atomic_int** mapArray = new std::atomic_int*[size[0]];
+	for (int i = 0; i < size[0]; ++i) {
+		mapArray[i] = new std::atomic_int[size[1]];
+	}
+
+	for (int y = 0; y < size[1]; ++y) {
+		for (int x = 0; x < size[0]; ++x) {
+			mapArray[x][y] = Map::nodeType::Free;
+		}
+	}
+
+	try {
+		map->SetMap(mapArray, Map::mapType::twoD, size);
+	}
+	catch (std::invalid_argument& e) {
+		std::cout << e.what();
+	}
 }
 
 void Controller::worker(int id, std::list<Robot>* robotList)
@@ -46,7 +63,7 @@ void Controller::worker(int id, std::list<Robot>* robotList)
 			switch (task) {
 			case Look: (*it).Look(); break;
 			case Compute: (*it).Compute(); break;
-			case Move: (*it).Move(); if ((*it).move == 10000) { terminate = true; } break;
+			case Move: (*it).Move(); break;
 			}
 		}
 	};
@@ -128,6 +145,7 @@ Controller * Controller::Instance()
 
 void Controller::WriteRobots() const
 {
+	/*
 	m_write.lock();
 	for (int i = 0; i < worker_num; ++i) {
 		int j = 0;
@@ -138,14 +156,31 @@ void Controller::WriteRobots() const
 			j++;
 		}
 	}
-	m_write.unlock();
+	m_write.unlock(); */
 }
 
-void Controller::AddRobots(unsigned int number)
+void Controller::AddRobots(unsigned int number = 1)
 {
-	for (int i = 0; i < number; ++i) {
+	int* position;
+	int dimensions = map->getDimensions();
+
+	for (unsigned int i = 0; i < number; ++i) {
 		unsigned int count = Robot::getCount();
-		robotList[count % worker_num].push_back(*(new Robot(count)));
+
+		position = new int[dimensions];
+		for (int i = 0; i < dimensions; ++i) {
+			position[i] = 0;
+		}
+
+		robotList[count % worker_num].push_back(*(new Robot(count, position)));
+		try {
+			map->PlaceRobot(position);
+		}
+		catch (std::invalid_argument& e) {
+			m_write.lock();
+			std::cout << e.what();
+			m_write.unlock();
+		}
 	}
 }
 
