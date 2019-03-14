@@ -3,7 +3,9 @@
 #include<iostream>
 #include<atomic>
 #include "Map.h"
-#include"Controller.h"
+
+class Controller;
+class Map;
 
 class Robot
 {
@@ -18,6 +20,8 @@ class Robot
 	void Look(Map::direction);
 
 	int lookData[10];
+
+	Map::direction nextMove;
 
 public:
 

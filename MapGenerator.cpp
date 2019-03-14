@@ -1,5 +1,7 @@
 #include "MapGenerator.h"
 
+#include<string>
+
 MapGenerator* MapGenerator::s_instance;
 
 MapGenerator::MapGenerator()

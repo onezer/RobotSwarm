@@ -1,14 +1,8 @@
 #pragma once
-
-
-#include"Robot.h"
-#include"Map.h"
-#include"MapGenerator.h"
-#include<atomic>
-#include<thread>
-#include<mutex>
-#include<iostream>
 #include<list>
+#include"Map.h"
+#include"Robot.h"
+#include"MapGenerator.h"
 
 class Controller
 {

@@ -34,8 +34,6 @@ int Map::getType() const
 	return maptype;
 }
 
-
-
 const int* Map::getSize() const
 {
 	return size;

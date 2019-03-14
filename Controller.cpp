@@ -30,6 +30,21 @@ Controller::Controller()
 	robotList = new std::list<Robot>[worker_num];
 
 	terminate = false;
+
+	//The MapGenerator will be used here
+	int size[] = { 10,10 };
+	std::atomic_int** mapArray = new std::atomic_int*[size[0]];
+	for (int i = 0; i < size[0]; ++i) {
+		mapArray[i] = new std::atomic_int[size[1]];
+	}
+
+	for (int y = 0; y < size[1]; ++y) {
+		for (int x = 0; x < size[0]; ++x) {
+			mapArray[x][y] = Map::nodeType::Free;
+		}
+	}
+
+	map->SetMap(mapArray, Map::mapType::twoD, size);
 }
 
 void Controller::worker(int id, std::list<Robot>* robotList)
@@ -139,12 +154,12 @@ void Controller::WriteRobots() const
 	m_write.unlock(); */
 }
 
-void Controller::AddRobots(unsigned int number)
+void Controller::AddRobots(unsigned int number = 1)
 {
 	int* position;
 	int dimensions = map->getDimensions();
 
-	for (int i = 0; i < number; ++i) {
+	for (unsigned int i = 0; i < number; ++i) {
 		unsigned int count = Robot::getCount();
 
 		position = new int[dimensions];
@@ -153,6 +168,7 @@ void Controller::AddRobots(unsigned int number)
 		}
 
 		robotList[count % worker_num].push_back(*(new Robot(count, position)));
+		map->PlaceRobot(position);
 	}
 }
 

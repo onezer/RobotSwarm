@@ -587,6 +587,29 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 		REQUIRE(map->Look(position, Map::direction::Up) == Map::nodeType::Obstacle);
 		REQUIRE(map->Look(position, Map::direction::Down) == Map::nodeType::Obstacle);
 	}
+
+	SECTION("Trying to collide with obstacle") {
+		int position[3] = { 2,2,2 };
+		mapArray[2][2][2] = Map::nodeType::Robot;
+
+		mapArray[2][2][3] = Map::nodeType::Obstacle;
+		REQUIRE(map->Move(position, Map::direction::Up) == 1);
+
+		mapArray[2][3][2] = Map::nodeType::Obstacle;
+		REQUIRE(map->Move(position, Map::direction::North) == 1);
+
+		mapArray[3][2][2] = Map::nodeType::Obstacle;
+		REQUIRE(map->Move(position, Map::direction::East) == 1);
+
+		mapArray[2][2][1] = Map::nodeType::Obstacle;
+		REQUIRE(map->Move(position, Map::direction::Down) == 1);
+
+		mapArray[2][1][2] = Map::nodeType::Obstacle;
+		REQUIRE(map->Move(position, Map::direction::South) == 1);
+
+		mapArray[1][2][2] = Map::nodeType::Obstacle;
+		REQUIRE(map->Move(position, Map::direction::West) == 1);
+	}
 }
 
 TEST_CASE("Creating a hex map, placing robots and moving them around"){
