@@ -44,7 +44,12 @@ Controller::Controller()
 		}
 	}
 
-	map->SetMap(mapArray, Map::mapType::twoD, size);
+	try {
+		map->SetMap(mapArray, Map::mapType::twoD, size);
+	}
+	catch (std::invalid_argument& e) {
+		std::cout << e.what();
+	}
 }
 
 void Controller::worker(int id, std::list<Robot>* robotList)
@@ -168,7 +173,14 @@ void Controller::AddRobots(unsigned int number = 1)
 		}
 
 		robotList[count % worker_num].push_back(*(new Robot(count, position)));
-		map->PlaceRobot(position);
+		try {
+			map->PlaceRobot(position);
+		}
+		catch (std::invalid_argument& e) {
+			m_write.lock();
+			std::cout << e.what();
+			m_write.unlock();
+		}
 	}
 }
 

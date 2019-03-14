@@ -85,18 +85,36 @@ int Map::Look(int * position, direction direction)
 		throw new std::invalid_argument("Robot Look: invalid robot position, it's out of range!");
 	}
 
-	if (getNode(position) != nodeType::Robot) {
-		throw new std::invalid_argument{ "Robot Look: invalid robot position, it's not a robot's position!" };
+	try {
+		if (getNode(position) != nodeType::Robot) {
+			throw new std::invalid_argument{ "Robot Look: invalid robot position, it's not a robot's position!" };
+		}
+	}
+	catch (std::invalid_argument) {
+		throw;
 	}
 
 	int newPos[3];
 
-	Transform(position, direction, newPos);
+	try {
+		Transform(position, direction, newPos);
+	}
+	catch (std::invalid_argument) {
+		throw;
+	}
+
 	if (!ValidPos(newPos)) {
 		return nodeType::Obstacle;
 	}
 
-	int node = getNode(newPos);
+	int node;
+
+	try {
+		node = getNode(newPos);
+	}
+	catch (std::invalid_argument) {
+		throw;
+	}
 
 	return node;
 }
@@ -107,12 +125,21 @@ int Map::PlaceRobot(int * position)
 		throw new std::invalid_argument("PlaceRobot: invalid robot position, it's out of range!");
 	}
 
-	if (getNode(position) != nodeType::Free) {
-		return 1;
+	try {
+		if (getNode(position) != nodeType::Free) {
+			return 1;
+		}
+	}
+	catch (std::invalid_argument) {
+		throw;
 	}
 
-	setNode(position, nodeType::Robot);
-
+	try {
+		setNode(position, nodeType::Robot);
+	}
+	catch (std::invalid_argument) {
+		throw;
+	}
 	return 0;
 }
 
@@ -126,7 +153,12 @@ int Map::RemoveRobot(int * position)
 		return 1;
 	}
 
-	setNode(position, nodeType::Free);
+	try {
+		setNode(position, nodeType::Free);
+	}
+	catch (std::invalid_argument) {
+		throw;
+	}
 
 	return 0;
 }

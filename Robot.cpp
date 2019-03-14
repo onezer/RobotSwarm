@@ -24,16 +24,26 @@ Robot::~Robot()
 
 void Robot::Move(Map::direction direction)
 {
-	int result = map->Move(position, direction);
-	if (result != 0) {
-		controller->TerminateSimulation();
-		std::cout << "Simulation terminated: Robot with ID:" << ID << " collided!\n";
+	try {
+		int result = map->Move(position, direction);
+		if (result != 0) {
+			controller->TerminateSimulation();
+			std::cout << "Simulation terminated: Robot with ID:" << ID << " collided!\n";
+		}
+	}
+	catch (std::invalid_argument& e) {
+		std::cout << e.what();
 	}
 }
 
 void Robot::Look(Map::direction direction)
 {
-	lookData[direction] = map->Look(position, direction);
+	try {
+		lookData[direction] = map->Look(position, direction);
+	}
+	catch (std::invalid_argument& e) {
+		std::cout << e.what();
+	}
 }
 
 void Robot::Look()
