@@ -14,7 +14,7 @@ class Robot
 	Map* map;
 	Controller* controller;
 
-	int* position;
+	int position[3];
 
 	void Move(Map::direction);
 	void Look(Map::direction);

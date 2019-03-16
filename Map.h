@@ -9,7 +9,7 @@ class Map
 	Map();
 	void* MapArray;
 	static Map* s_instance;
-	int* size;
+	int size[3];
 	int dimensions;
 	
 	mutable std::mutex m_Move;
@@ -29,6 +29,8 @@ public:
 	int Look(int* position, direction direction);
 	int PlaceRobot(int* position);
 	int RemoveRobot(int* position);
+
+	void DisplayMap();
 
 	~Map();
 

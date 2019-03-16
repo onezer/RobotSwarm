@@ -1,4 +1,5 @@
 #include "Map.h"
+#include<iostream>
 
 Map * Map::Instance()
 {
@@ -9,6 +10,10 @@ Map * Map::Instance()
 
 void Map::SetMap(void* MapArray, mapType maptype, int* size)
 {
+	if (this->MapArray != nullptr) {
+		delete[] this->MapArray;
+	}
+
 	this->MapArray = MapArray;
 	this->maptype = maptype;
 
@@ -19,9 +24,7 @@ void Map::SetMap(void* MapArray, mapType maptype, int* size)
 	default: throw new std::invalid_argument("SetMap: Wrong maptype!"); break;
 	}
 
-	int* mySize = new int[dimensions];
-	CopyPos(size, mySize);
-	this->size = mySize;
+	CopyPos(size, this->size);
 }
 
 int Map::getDimensions() const
@@ -161,6 +164,22 @@ int Map::RemoveRobot(int * position)
 	}
 
 	return 0;
+}
+
+void Map::DisplayMap()
+{
+	for (int y = size[1] - 1; y >= 0; --y) {
+		for (int x = 0; x < size[0]; ++x) {
+			switch (((std::atomic_int**)MapArray)[x][y]) {
+			case 0: std::cout << " "; break;
+			case 1: std::cout << "X"; break;
+			case 2: std::cout << "O"; break;
+			}
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+	std::cout << std::endl;
 }
 
 Map* Map::s_instance;
