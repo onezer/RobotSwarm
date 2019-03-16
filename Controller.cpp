@@ -5,12 +5,12 @@ Controller* Controller::s_instance;
 
 int Controller::max_threads;
 int Controller::worker_num;
-std::atomic_int* Controller::threads_done;
+std::atomic_int Controller::threads_done[4];
 std::thread* Controller::workers;
 std::mutex Controller::m_write;
 std::mutex Controller::m_iter;
 std::mutex Controller::m_terminate;
-std::list<std::shared_ptr<Robot>>* Controller::robotList;
+std::list<std::unique_ptr<Robot>>* Controller::robotList;
 bool Controller::terminate;
 bool Controller::CBDone;
 
@@ -19,7 +19,6 @@ Controller::Controller()
 	max_threads = std::thread::hardware_concurrency() == 1 ? 2 : std::thread::hardware_concurrency();
 	worker_num = max_threads - 1;
 
-	threads_done = new std::atomic_int[4];
 	for (int i = 0; i < 4; ++i) {
 		threads_done[i] = 0;
 	}
@@ -33,18 +32,20 @@ Controller::Controller()
 
 	workers = new std::thread[worker_num];
 
-	robotList = new std::list<std::shared_ptr<Robot>>[worker_num];
+	robotList = new std::list<std::unique_ptr<Robot>>[worker_num];
 
 	terminate = false;
+
+	std::cout << "Constructor\n";
 }
 
-void Controller::worker(int id, std::list<std::shared_ptr<Robot>>* robotList)
+void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 {
 	enum Task { Look, Compute, Move };
 
 	int i = 0;
 
-	auto LCM = [](std::list<std::shared_ptr<Robot>>* robotList, Task task) {
+	auto LCM = [](std::list<std::unique_ptr<Robot>>* robotList, Task task) {
 		for (auto it = robotList->begin(); it != robotList->end(); it++) {
 			switch (task) {
 			case Look: (**it).Look(); break;
@@ -151,15 +152,19 @@ void Controller::AddRobot(int* position)
 {
 	unsigned int count = Robot::getCount();
 
-	robotList[count % worker_num].push_back(std::make_shared<Robot>(count, position));
+	
 	try {
-		map->PlaceRobot(position);
+		int success = map->PlaceRobot(position);
+		if (success == 0) {
+			robotList[count % worker_num].push_back(std::make_unique<Robot>(count, position));
+		}
 	}
 	catch (std::exception& e) {
 		m_write.lock();
 		std::cout << e.what();
 		m_write.unlock();
 	}
+	
 }
 
 void Controller::TerminateSimulation()

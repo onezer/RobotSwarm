@@ -87,8 +87,9 @@ void MapGenerator::GenerateMap(Map::mapType type, int * size, bool randomSeed, u
 			((std::atomic_int**)mapArray)[i] = new std::atomic_int[size[1]];
 		}
 
-		this->size = size;
-
+		for (int i = 0; i < 2; ++i) {
+			this->size[i] = size[i];
+		}
 	}
 
 	RandomFillMap(randomSeed, seed);

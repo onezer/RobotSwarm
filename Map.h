@@ -30,6 +30,8 @@ public:
 	int PlaceRobot(int* position);
 	int RemoveRobot(int* position);
 
+	void* GetMapArray();
+
 	void DisplayMap();
 
 	~Map();

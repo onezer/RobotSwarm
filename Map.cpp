@@ -11,7 +11,12 @@ Map * Map::Instance()
 void Map::SetMap(void* MapArray, mapType maptype, int* size)
 {
 	if (this->MapArray != nullptr) {
-		delete[] this->MapArray;
+		if (dimensions == 2) {
+			for (int i = 0; i < this->size[0]; ++i) {
+				delete[] ((std::atomic_int**)this->MapArray)[i];
+			}
+			delete[](std::atomic_int**)this->MapArray;
+		}
 	}
 
 	this->MapArray = MapArray;
@@ -164,6 +169,11 @@ int Map::RemoveRobot(int * position)
 	}
 
 	return 0;
+}
+
+void * Map::GetMapArray()
+{
+	return MapArray;
 }
 
 void Map::DisplayMap()

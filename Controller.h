@@ -12,11 +12,11 @@ class Controller
 
 	static int max_threads;
 	static int worker_num;
-	static std::atomic_int* threads_done;
+	static std::atomic_int threads_done[4];
 	static std::thread* workers;
 	static std::mutex m_write;
 	static std::mutex m_iter;
-	static std::list<std::shared_ptr<Robot>>* robotList;
+	static std::list<std::unique_ptr<Robot>>* robotList;
 	static bool CBDone;
 	static std::mutex m_terminate;
 
@@ -25,7 +25,7 @@ class Controller
 	static bool terminate;
 	static Controller* s_instance;
 
-	static void worker(int id, std::list<std::shared_ptr<Robot>>* robotList);
+	static void worker(int id, std::list<std::unique_ptr<Robot>>* robotList);
 	static void iterationCB(int i);
 	
 	int iteration;

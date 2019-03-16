@@ -36,7 +36,7 @@ int main() {
 
 	//auto start = std::chrono::steady_clock::now();
 
-	for (int x = 0; x < 100; ++x) {
+	for (int x = 0; x < 50000; ++x) {
 		mapGenerator->GenerateMap(Map::mapType::twoD, size, false, 12335);
 		std::thread* workers = controller->StartSimulation(pos);
 
@@ -45,7 +45,7 @@ int main() {
 		for (int i = 0; i < worker_num; ++i) {
 			workers[i].join();
 		}
-		std::cout << x << ". simuation\n";
+		//std::cout << x << ". simuation\n";
 	}
 
 

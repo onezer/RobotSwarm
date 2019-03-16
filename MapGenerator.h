@@ -10,7 +10,7 @@ class MapGenerator
 	void SmoothMap();
 	int GetSurroundingWallCount(int gridX, int gridY);
 	Map::mapType type;
-	int* size;
+	int size[3];
 
 public:
 	static MapGenerator* Instance();
