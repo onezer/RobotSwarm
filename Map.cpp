@@ -1,6 +1,8 @@
 #include "Map.h"
 #include<iostream>
 
+Map* Map::s_instance;
+
 Map * Map::Instance()
 {
 	if (!s_instance)
@@ -29,7 +31,8 @@ void Map::SetMap(void* MapArray, mapType maptype, int* size)
 	default: throw new std::invalid_argument("SetMap: Wrong maptype!"); break;
 	}
 
-	CopyPos(size, this->size);
+	//CopyPos(size, this->size);
+	std::memcpy(this->size, size, dimensions * sizeof(int));
 }
 
 int Map::getDimensions() const
@@ -72,7 +75,7 @@ int Map::Move(int * position, direction direction)
 	if (getNode(newPos) == nodeType::Free) {
 		setNode(newPos, nodeType::Robot);
 		setNode(position, nodeType::Free);
-		CopyPos(newPos, position);
+		std::memcpy(position, newPos, dimensions*sizeof(int));
 	}
 	else {
 		m_Move.unlock();
@@ -207,12 +210,12 @@ void * Map::Recycle(int * size)
 	return MapArray;
 }
 
-void Map::DisplayMap()
+void Map::DisplayMap() const
 {
 	for (int y = size[1] - 1; y >= 0; --y) {
 		for (int x = 0; x < size[0]; ++x) {
 			switch (((std::atomic_int**)MapArray)[x][y]) {
-			case 0: std::cout << " "; break;
+			case 0: std::cout << "-"; break;
 			case 1: std::cout << "X"; break;
 			case 2: std::cout << "O"; break;
 			}
@@ -223,13 +226,10 @@ void Map::DisplayMap()
 	std::cout << std::endl;
 }
 
-Map* Map::s_instance;
-
 Map::Map()
 {
-	for (int i = 0; i < 3; ++i) {
-		size[i] = 0;
-	}
+	*size = { 0 };
+
 	MapArray = nullptr;
 }
 
@@ -284,7 +284,7 @@ void Map::Transform(int * position, direction direction, int* newPosition) const
 		throw new std::invalid_argument("Transform: Invalid direction!");
 	}
 
-	CopyPos(position, newPosition);
+	memcpy(newPosition, position, dimensions * sizeof(int));
 
 	switch (direction) {
 	case North: newPosition[1] += 1; break;
@@ -321,12 +321,6 @@ bool Map::ValidPos(int * position) const
 	return true;
 }
 
-void Map::CopyPos(int * source, int * target) const
-{
-	for (int i = 0; i < dimensions; ++i) {
-		target[i] = source[i];
-	}
-}
 
 bool Map::ValidDir(direction direction) const {
 	switch (maptype) {

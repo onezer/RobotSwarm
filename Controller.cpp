@@ -6,11 +6,10 @@ Controller* Controller::s_instance;
 int Controller::max_threads;
 int Controller::worker_num;
 std::atomic_int Controller::threads_done[4];
-std::thread* Controller::workers;
 std::mutex Controller::m_write;
 std::mutex Controller::m_iter;
 std::mutex Controller::m_terminate;
-std::list<std::unique_ptr<Robot>>* Controller::robotList;
+
 bool Controller::terminate;
 bool Controller::CBDone;
 
@@ -19,9 +18,7 @@ Controller::Controller()
 	max_threads = std::thread::hardware_concurrency() == 1 ? 2 : std::thread::hardware_concurrency();
 	worker_num = max_threads - 1;
 
-	for (int i = 0; i < 4; ++i) {
-		threads_done[i] = 0;
-	}
+	*threads_done = { 0 };
 
 	CBDone = false;
 
@@ -35,8 +32,6 @@ Controller::Controller()
 	robotList = new std::list<std::unique_ptr<Robot>>[worker_num];
 
 	terminate = false;
-
-	std::cout << "Constructor\n";
 }
 
 void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
@@ -117,11 +112,11 @@ void Controller::iterationCB(int i)
 		Controller::Instance()->AddRobot(Controller::Instance()->robotStartPos);
 	}
 
-    /*m_write.lock();
+    m_write.lock();
 	Map::Instance()->DisplayMap();
-	m_write.unlock();*/
+	m_write.unlock();
 
-	//std::this_thread::sleep_for(std::chrono::microseconds(50));
+	std::this_thread::sleep_for(std::chrono::milliseconds(1500));
 }
 
 
@@ -179,17 +174,13 @@ void Controller::WaitForFinish()
 	}
 }
 
-std::thread* Controller::StartSimulation(int* position)
+void Controller::StartSimulation(int* position)
 {
 	terminate = false;
 
-	for (int i = 0; i < map->getDimensions(); ++i) {
-		robotStartPos[i] = position[i];
-	}
+	std::memcpy(robotStartPos,position,map->getDimensions()*sizeof(int));
 
-	for (int i = 0; i < 4; ++i) {
-		threads_done[i] = 0;
-	}
+	*threads_done = { 0 };
 
 	for (int i = 0; i < worker_num; ++i) {
 		if(robotList[i].size())
@@ -202,9 +193,6 @@ std::thread* Controller::StartSimulation(int* position)
 		std::cout << "Worker #" << i << " created\n";
 		m_write.unlock();*/
 	}
-	
-
-	return workers;
 }
 
 int Controller::getWorkerNum() const
