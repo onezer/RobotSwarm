@@ -171,8 +171,39 @@ int Map::RemoveRobot(int * position)
 	return 0;
 }
 
-void * Map::GetMapArray()
+void Map::Clean()
 {
+	if (dimensions == 2) {
+		for (int y = size[1] - 1; y >= 0; --y) {
+			for (int x = 0; x < size[0]; ++x) {
+				if (((std::atomic_int**)MapArray)[x][y] == nodeType::Robot) {
+					((std::atomic_int**)MapArray)[x][y] = nodeType::Free;
+				}
+			}
+		}
+	}
+	else if (dimensions == 3) {
+		for (int y = size[1] - 1; y >= 0; --y) {
+			for (int x = 0; x < size[0]; ++x) {
+				for (int z = 0; z < size[2]; z++) {
+					if (((std::atomic_int***)MapArray)[x][y][z] == nodeType::Robot) {
+						((std::atomic_int***)MapArray)[x][y][z] = nodeType::Free;
+					}
+				}
+				
+			}
+		}
+	}
+}
+
+void * Map::Recycle(int * size)
+{
+	for (int i = 0; i < dimensions; ++i) {
+		if (size[i] != this->size[i]) {
+			return nullptr;
+		}
+	}
+
 	return MapArray;
 }
 
@@ -196,13 +227,23 @@ Map* Map::s_instance;
 
 Map::Map()
 {
+	for (int i = 0; i < 3; ++i) {
+		size[i] = 0;
+	}
+	MapArray = nullptr;
 }
 
 
 Map::~Map()
 {
-	delete[] size;
-	delete[] MapArray;
+	if (this->MapArray != nullptr) {
+		if (dimensions == 2) {
+			for (int i = 0; i < this->size[0]; ++i) {
+				delete[]((std::atomic_int**)this->MapArray)[i];
+			}
+			delete[](std::atomic_int**)this->MapArray;
+		}
+	}
 }
 
 int Map::getNode(int * position) const

@@ -31,7 +31,7 @@ void Robot::Move(Map::direction direction)
 		int result = map->Move(position, direction);
 		if (result != 0) {
 			controller->TerminateSimulation();
-			//std::cout << "Simulation terminated: Robot with ID:" << ID << " collided!\n";
+			std::cout << "Simulation terminated: Robot with ID:" << ID << " collided!\n";
 		}
 	}
 	catch (std::invalid_argument& e) {
@@ -72,8 +72,6 @@ void Robot::Compute()
 	else if (lookData[Map::direction::West] == 0) {
 		nextMove = Map::direction::West;
 	}
-
-
 }
 
 void Robot::Move()

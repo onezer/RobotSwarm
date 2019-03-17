@@ -11,6 +11,9 @@ class MapGenerator
 	int GetSurroundingWallCount(int gridX, int gridY);
 	Map::mapType type;
 	int size[3];
+	int dimensions;
+
+	void Create();
 
 public:
 	static MapGenerator* Instance();

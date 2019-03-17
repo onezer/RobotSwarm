@@ -6,8 +6,32 @@ MapGenerator* MapGenerator::s_instance;
 
 MapGenerator::MapGenerator()
 {
+	for (int i = 0; i < 3; ++i) {
+		size[i] = 0;
+	}
+
+	dimensions = 0;
 }
 
+
+void MapGenerator::Create()
+{
+	if (dimensions == 2) {
+		mapArray = new std::atomic_int*[size[0]];
+		for (int i = 0; i < size[0]; ++i) {
+			((std::atomic_int**)mapArray)[i] = new std::atomic_int[size[1]];
+		}
+	}
+	else if (dimensions == 3) {
+		mapArray = new std::atomic_int**[size[0]];
+		for (int i = 0; i < size[0]; ++i) {
+			((std::atomic_int***)mapArray)[i] = new std::atomic_int*[size[1]];
+			for (int j = 0; j < size[1]; ++j) {
+				((std::atomic_int***)mapArray)[i][j] = new std::atomic_int[size[2]];
+			}
+		}
+	}
+}
 
 MapGenerator * MapGenerator::Instance()
 {
@@ -19,34 +43,39 @@ MapGenerator * MapGenerator::Instance()
 void MapGenerator::RandomFillMap(bool randomSeed, unsigned int seed = 0) {
 	int ratio = 55;
 
-	for (int y = 0; y < size[1]; ++y) {
-		for (int x = 0; x < size[0]; ++x) {
-			if (x == 0 || x == size[0] - 1 || y == 0 || y == size[1]) {
-				((std::atomic_int**)mapArray)[x][y] = Map::nodeType::Obstacle;
-			}
-			else {
-				if (std::rand() % 100 < ratio) {
-					((std::atomic_int**)mapArray)[x][y] = Map::nodeType::Free;
+	if(dimensions == 2){
+		for (int y = 0; y < size[1]; ++y) {
+			for (int x = 0; x < size[0]; ++x) {
+				if (x == 0 || x == size[0] - 1 || y == 0 || y == size[1]) {
+					((std::atomic_int**)mapArray)[x][y] = Map::nodeType::Obstacle;
 				}
 				else {
-					((std::atomic_int**)mapArray)[x][y] = Map::nodeType::Obstacle;
+					if (std::rand() % 100 < ratio) {
+						((std::atomic_int**)mapArray)[x][y] = Map::nodeType::Free;
+					}
+					else {
+						((std::atomic_int**)mapArray)[x][y] = Map::nodeType::Obstacle;
+					}
 				}
 			}
 		}
 	}
+	
 }
 
 void MapGenerator::SmoothMap()
 {
-	for (int x = 0; x < size[0]; x++) {
-		for (int y = 0; y < size[1]; y++) {
-			int neighbourWallTiles = GetSurroundingWallCount(x, y);
+	if (dimensions == 2) {
+		for (int x = 0; x < size[0]; x++) {
+			for (int y = 0; y < size[1]; y++) {
+				int neighbourWallTiles = GetSurroundingWallCount(x, y);
 
-			if (neighbourWallTiles > 4)
-				((std::atomic_int**)mapArray)[x][y] = 1;
-			else if (neighbourWallTiles < 4)
-				((std::atomic_int**)mapArray)[x][y] = 0;
+				if (neighbourWallTiles > 4)
+					((std::atomic_int**)mapArray)[x][y] = 1;
+				else if (neighbourWallTiles < 4)
+					((std::atomic_int**)mapArray)[x][y] = 0;
 
+			}
 		}
 	}
 }
@@ -82,14 +111,17 @@ void MapGenerator::GenerateMap(Map::mapType type, int * size, bool randomSeed, u
 	this->type = type;
 
 	if (type == Map::mapType::twoD || type == Map::mapType::hex) {
-		mapArray = new std::atomic_int*[size[0]];
-		for (int i = 0; i < size[0]; ++i) {
-			((std::atomic_int**)mapArray)[i] = new std::atomic_int[size[1]];
-		}
+		dimensions = 2;
 
 		for (int i = 0; i < 2; ++i) {
 			this->size[i] = size[i];
 		}
+	}
+
+	mapArray = Map::Instance()->Recycle(size);
+	
+	if (mapArray == nullptr) {
+		Create();
 	}
 
 	RandomFillMap(randomSeed, seed);
@@ -99,6 +131,7 @@ void MapGenerator::GenerateMap(Map::mapType type, int * size, bool randomSeed, u
 	}
 
 	Map::Instance()->SetMap(mapArray, type, size);
+	mapArray = nullptr;
 }
 
 MapGenerator::~MapGenerator()

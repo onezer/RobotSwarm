@@ -35,6 +35,7 @@ public:
 	void WriteRobots() const;
 	void AddRobot(int* position);
 	void TerminateSimulation();
+	void WaitForFinish();
 	std::thread* StartSimulation(int* position);
 	int getWorkerNum() const;
 

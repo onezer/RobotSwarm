@@ -34,26 +34,23 @@ int main() {
 	int pos[2] = { 100,25 };
 	//int pos[2] = { 0,0 };
 
-	//auto start = std::chrono::steady_clock::now();
+	auto start = std::chrono::steady_clock::now();
+	mapGenerator->GenerateMap(Map::mapType::twoD, size, false, 12335);
+	for (int x = 0; x < 1000; ++x) {
+		map->Clean();
 
-	for (int x = 0; x < 50000; ++x) {
-		mapGenerator->GenerateMap(Map::mapType::twoD, size, false, 12335);
-		std::thread* workers = controller->StartSimulation(pos);
+		controller->StartSimulation(pos);
 
-		int worker_num = controller->getWorkerNum();
-
-		for (int i = 0; i < worker_num; ++i) {
-			workers[i].join();
-		}
+		controller->WaitForFinish();
 		//std::cout << x << ". simuation\n";
 	}
 
 
 	//std::cout << std::endl << Robot::getCount() << " robots\n";
 
-	//auto end = std::chrono::steady_clock::now();
+	auto end = std::chrono::steady_clock::now();
 
 	
 
-	//std::cout << "DONE\n" << "Simulation time: " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " microseconds\n"; 
+	std::cout << "DONE\n" << "Simulation time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " milliseconds\n"; 
 }

@@ -172,6 +172,13 @@ void Controller::TerminateSimulation()
 	terminate = true;
 }
 
+void Controller::WaitForFinish()
+{
+	for (int i = 0; i < worker_num; ++i) {
+		workers[i].join();
+	}
+}
+
 std::thread* Controller::StartSimulation(int* position)
 {
 	terminate = false;
