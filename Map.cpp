@@ -1,4 +1,5 @@
 #include "Map.h"
+#include<iostream>
 
 Map * Map::Instance()
 {
@@ -9,6 +10,15 @@ Map * Map::Instance()
 
 void Map::SetMap(void* MapArray, mapType maptype, int* size)
 {
+	if (this->MapArray != nullptr) {
+		if (dimensions == 2) {
+			for (int i = 0; i < this->size[0]; ++i) {
+				delete[] ((std::atomic_int**)this->MapArray)[i];
+			}
+			delete[](std::atomic_int**)this->MapArray;
+		}
+	}
+
 	this->MapArray = MapArray;
 	this->maptype = maptype;
 
@@ -19,9 +29,7 @@ void Map::SetMap(void* MapArray, mapType maptype, int* size)
 	default: throw new std::invalid_argument("SetMap: Wrong maptype!"); break;
 	}
 
-	int* mySize = new int[dimensions];
-	CopyPos(size, mySize);
-	this->size = mySize;
+	CopyPos(size, this->size);
 }
 
 int Map::getDimensions() const
@@ -163,17 +171,79 @@ int Map::RemoveRobot(int * position)
 	return 0;
 }
 
+void Map::Clean()
+{
+	if (dimensions == 2) {
+		for (int y = size[1] - 1; y >= 0; --y) {
+			for (int x = 0; x < size[0]; ++x) {
+				if (((std::atomic_int**)MapArray)[x][y] == nodeType::Robot) {
+					((std::atomic_int**)MapArray)[x][y] = nodeType::Free;
+				}
+			}
+		}
+	}
+	else if (dimensions == 3) {
+		for (int y = size[1] - 1; y >= 0; --y) {
+			for (int x = 0; x < size[0]; ++x) {
+				for (int z = 0; z < size[2]; z++) {
+					if (((std::atomic_int***)MapArray)[x][y][z] == nodeType::Robot) {
+						((std::atomic_int***)MapArray)[x][y][z] = nodeType::Free;
+					}
+				}
+				
+			}
+		}
+	}
+}
+
+void * Map::Recycle(int * size)
+{
+	for (int i = 0; i < dimensions; ++i) {
+		if (size[i] != this->size[i]) {
+			return nullptr;
+		}
+	}
+
+	return MapArray;
+}
+
+void Map::DisplayMap()
+{
+	for (int y = size[1] - 1; y >= 0; --y) {
+		for (int x = 0; x < size[0]; ++x) {
+			switch (((std::atomic_int**)MapArray)[x][y]) {
+			case 0: std::cout << " "; break;
+			case 1: std::cout << "X"; break;
+			case 2: std::cout << "O"; break;
+			}
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+	std::cout << std::endl;
+}
+
 Map* Map::s_instance;
 
 Map::Map()
 {
+	for (int i = 0; i < 3; ++i) {
+		size[i] = 0;
+	}
+	MapArray = nullptr;
 }
 
 
 Map::~Map()
 {
-	delete[] size;
-	delete[] MapArray;
+	if (this->MapArray != nullptr) {
+		if (dimensions == 2) {
+			for (int i = 0; i < this->size[0]; ++i) {
+				delete[]((std::atomic_int**)this->MapArray)[i];
+			}
+			delete[](std::atomic_int**)this->MapArray;
+		}
+	}
 }
 
 int Map::getNode(int * position) const

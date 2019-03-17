@@ -5,9 +5,19 @@ class MapGenerator
 	MapGenerator();
 
 	static MapGenerator* s_instance;
+	void* mapArray;
+	void RandomFillMap(bool randomSeed, unsigned int seed);
+	void SmoothMap();
+	int GetSurroundingWallCount(int gridX, int gridY);
+	Map::mapType type;
+	int size[3];
+	int dimensions;
+
+	void Create();
 
 public:
 	static MapGenerator* Instance();
-	int* GenerateMap(Map::mapType type, int* size, bool randomSeed, std::string seed="");
+	
+	void GenerateMap(Map::mapType type, int* size, bool randomSeed, unsigned int seed=0);
 	~MapGenerator();
 };

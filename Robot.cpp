@@ -4,12 +4,16 @@
 
 std::_Atomic_uint Robot::count;
 
-Robot::Robot(unsigned int id, int* position) : ID{ id }, position{position}
+Robot::Robot(unsigned int id, int* position) : ID{ id }
 {
 	map = Map::Instance();
 	controller = Controller::Instance();
 	for (int i = 0; i < 10; ++i) {
 		lookData[i] = -1;
+	}
+
+	for (int i = 0; i < Map::Instance()->getDimensions(); ++i) {
+		this->position[i] = position[i];
 	}
 
 	++count;
@@ -18,7 +22,6 @@ Robot::Robot(unsigned int id, int* position) : ID{ id }, position{position}
 
 Robot::~Robot()
 {
-	delete[] position;
 	--count;
 }
 
@@ -56,23 +59,18 @@ void Robot::Look()
 
 void Robot::Compute()
 {
-	std::cout << position[0] << " " << position[1] << std::endl;
 
-	if (lookData[Map::direction::North] == 0 && lookData[Map::direction::West] == 1) {
+	if (lookData[Map::direction::North] == 0) {
 		nextMove = Map::direction::North;
 	} 
-	else if (lookData[Map::direction::East] == 0 && lookData[Map::direction::North] == 1) {
+	else if (lookData[Map::direction::East] == 0) {
 		nextMove = Map::direction::East;
 	}
-	else if (lookData[Map::direction::South] == 0 && lookData[Map::direction::East] == 1) {
+	else if (lookData[Map::direction::South] == 0) {
 		nextMove = Map::direction::South;
 	}
-	else if (lookData[Map::direction::West] == 0 && lookData[Map::direction::South] == 1) {
+	else if (lookData[Map::direction::West] == 0) {
 		nextMove = Map::direction::West;
-	}
-
-	if (position[0] == 1 && position[1] == 0) {
-		controller->TerminateSimulation();
 	}
 }
 
