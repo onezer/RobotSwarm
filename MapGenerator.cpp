@@ -6,9 +6,7 @@ MapGenerator* MapGenerator::s_instance;
 
 MapGenerator::MapGenerator()
 {
-	for (int i = 0; i < 3; ++i) {
-		size[i] = 0;
-	}
+	*size = { 0 };
 
 	dimensions = 0;
 }
@@ -112,11 +110,12 @@ void MapGenerator::GenerateMap(Map::mapType type, int * size, bool randomSeed, u
 
 	if (type == Map::mapType::twoD || type == Map::mapType::hex) {
 		dimensions = 2;
-
-		for (int i = 0; i < 2; ++i) {
-			this->size[i] = size[i];
-		}
 	}
+	else if (type == Map::mapType::threeD) {
+		dimensions = 3;
+	}
+
+	std::memcpy(this->size, size, dimensions * sizeof(int));
 
 	mapArray = Map::Instance()->Recycle(size);
 	

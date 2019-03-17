@@ -12,9 +12,7 @@ Robot::Robot(unsigned int id, int* position) : ID{ id }
 		lookData[i] = -1;
 	}
 
-	for (int i = 0; i < Map::Instance()->getDimensions(); ++i) {
-		this->position[i] = position[i];
-	}
+	std::memcpy(this->position,position, Map::Instance()->getDimensions()*sizeof(int));
 
 	++count;
 }

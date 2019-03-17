@@ -32,7 +32,7 @@ public:
 
 	void Clean();
 	void* Recycle(int* size);
-	void DisplayMap();
+	void DisplayMap() const;
 
 	~Map();
 
@@ -42,6 +42,6 @@ private:
 	int getNode(int* position) const;
 	void setNode(int* position, nodeType type);
 	void Transform(int* position, direction direction, int* newPosition) const;
-	void CopyPos(int* source, int* target) const;
+	//void CopyPos(int* source, int* target) const;
 	bool ValidDir(direction direction) const;
 };
