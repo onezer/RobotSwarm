@@ -36,7 +36,7 @@ int main() {
 
 	auto start = std::chrono::steady_clock::now();
 	//mapGenerator->GenerateMap(Map::mapType::twoD, size, false, 12335);
-	for (int x = 0; x < 1; ++x) {
+	for (int x = 0; x < 1000; ++x) {
 		map->Clean();
 
 		controller->StartSimulation(pos);
