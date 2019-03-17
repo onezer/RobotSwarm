@@ -1,5 +1,5 @@
 #include "Controller.h"
-
+#include<algorithm>
 
 Controller* Controller::s_instance;
 
@@ -112,11 +112,11 @@ void Controller::iterationCB(int i)
 		Controller::Instance()->AddRobot(Controller::Instance()->robotStartPos);
 	}
 
-    m_write.lock();
+    /*m_write.lock();
 	Map::Instance()->DisplayMap();
 	m_write.unlock();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+	std::this_thread::sleep_for(std::chrono::milliseconds(1500));*/
 }
 
 
@@ -180,7 +180,7 @@ void Controller::StartSimulation(int* position)
 
 	std::memcpy(robotStartPos,position,map->getDimensions()*sizeof(int));
 
-	*threads_done = { 0 };
+	std::fill(threads_done, threads_done + 4, 0);
 
 	for (int i = 0; i < worker_num; ++i) {
 		if(robotList[i].size())
