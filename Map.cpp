@@ -1,5 +1,7 @@
 #include "Map.h"
 #include<iostream>
+#include <cv.h>
+#include <highgui.h>
 
 Map* Map::s_instance;
 
@@ -31,7 +33,6 @@ void Map::SetMap(void* MapArray, mapType maptype, int* size)
 	default: throw new std::invalid_argument("SetMap: Wrong maptype!"); break;
 	}
 
-	//CopyPos(size, this->size);
 	std::memcpy(this->size, size, dimensions * sizeof(int));
 }
 
@@ -138,7 +139,12 @@ int Map::PlaceRobot(int * position)
 
 	try {
 		if (getNode(position) != nodeType::Free) {
-			return 1;
+			if (getNode(position) == nodeType::Robot) {
+				return 2;
+			}
+			else {
+				return 1;
+			}
 		}
 	}
 	catch (std::invalid_argument) {
@@ -212,7 +218,7 @@ void * Map::Recycle(int * size)
 
 void Map::DisplayMap() const
 {
-	for (int y = size[1] - 1; y >= 0; --y) {
+	/*for (int y = size[1] - 1; y >= 0; --y) {
 		for (int x = 0; x < size[0]; ++x) {
 			switch (((std::atomic_int**)MapArray)[x][y]) {
 			case 0: std::cout << "-"; break;
@@ -223,7 +229,47 @@ void Map::DisplayMap() const
 		std::cout << std::endl;
 	}
 	std::cout << std::endl;
-	std::cout << std::endl;
+	std::cout << std::endl;*/
+	
+	IplImage* img = cvCreateImage(cvSize(size[0], size[1]), 8, 3);
+	IplImage* big = cvCreateImage(cvSize(size[0] * 5, size[1] * 7), 8, 3);
+
+	IplImage* redchannel = cvCreateImage(cvGetSize(img), 8, 1);
+	IplImage* greenchannel = cvCreateImage(cvGetSize(img), 8, 1);
+	IplImage* bluechannel = cvCreateImage(cvGetSize(img), 8, 1);
+
+	for (int y = 0; y < size[1]; ++y) {
+		for (int x = 0; x < size[0]; ++x) {
+			switch (((std::atomic_int**)MapArray)[x][y]) {
+			case 0: 
+				cvSetReal2D(redchannel, size[1] - y - 1, x, 0);
+				cvSetReal2D(greenchannel, size[1] - y - 1, x, 0);
+				cvSetReal2D(bluechannel, size[1] - y - 1, x, 0);
+				break;
+			case 1: 
+				cvSetReal2D(redchannel, size[1] - y - 1, x, 124);
+				cvSetReal2D(greenchannel, size[1] - y - 1, x, 68);
+				cvSetReal2D(bluechannel, size[1] - y - 1, x, 42);
+				break;
+			case 2: 
+				cvSetReal2D(redchannel, size[1] - y - 1, x, 255);
+				cvSetReal2D(greenchannel, size[1] - y - 1, x, 0);
+				cvSetReal2D(bluechannel, size[1] - y - 1, x, 0);
+				break;
+			}
+		}
+	}
+
+	cvMerge(bluechannel, greenchannel, redchannel, NULL, img);
+
+	cvResize(img, big);
+
+
+	cvNamedWindow("CurrentIteration");
+	cvShowImage("CurrentIteration", big);
+	cvWaitKey(1);
+	cvReleaseImage(&img);
+	cvReleaseImage(&big);
 }
 
 Map::Map()
@@ -231,6 +277,8 @@ Map::Map()
 	*size = { 0 };
 
 	MapArray = nullptr;
+
+	
 }
 
 

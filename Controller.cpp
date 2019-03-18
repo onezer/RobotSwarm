@@ -11,7 +11,6 @@ std::mutex Controller::m_iter;
 std::mutex Controller::m_terminate;
 
 bool Controller::terminate;
-bool Controller::CBDone;
 
 Controller::Controller()
 {
@@ -19,8 +18,6 @@ Controller::Controller()
 	worker_num = max_threads - 1;
 
 	*threads_done = { 0 };
-
-	CBDone = false;
 
 	iteration = 0;
 
@@ -38,7 +35,7 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 {
 	enum Task { Look, Compute, Move };
 
-	int i = 0;
+	unsigned int i = 0;
 
 	auto LCM = [](std::list<std::unique_ptr<Robot>>* robotList, Task task) {
 		for (auto it = robotList->begin(); it != robotList->end(); it++) {
@@ -56,10 +53,8 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 	while (!terminate) {
 		++i;
 
-		if (!CBDone && m_iter.try_lock() && !terminate) {
-			CBDone = true;
+		if (id == 0 && !terminate) {
 			iterationCB(i);
-			m_iter.unlock();
 		}
 
 		++threads_done[0];
@@ -99,24 +94,23 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 		std::cout << "Thread #" << id << " is done with stage3\n";
 		m_write.unlock();*/
 
-		CBDone = false;
 		++threads_done[3];
 		while (threads_done[3] != worker_num && !terminate);
 		threads_done[2] = 0;
 	}
 }
 
-void Controller::iterationCB(int i)
+void Controller::iterationCB(unsigned int i)
 {
-	if (i % 4 == 1) {
+	if (i ==1 || i == 200) {
 		Controller::Instance()->AddRobot(Controller::Instance()->robotStartPos);
 	}
 
-    /*m_write.lock();
+    //m_write.lock();
 	Map::Instance()->DisplayMap();
-	m_write.unlock();
+	//m_write.unlock();
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(1500));*/
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 
@@ -152,6 +146,18 @@ void Controller::AddRobot(int* position)
 		int success = map->PlaceRobot(position);
 		if (success == 0) {
 			robotList[count % worker_num].push_back(std::make_unique<Robot>(count, position));
+		}
+		else if (success == 1) {
+			terminate = true;
+			m_write.lock();
+			std::cout << "Robot placed on obstacle\n";
+			m_write.unlock();
+		}
+		else if (success == 2) {
+			terminate = true;
+			m_write.lock();
+			std::cout << "Robot placed on robot\n";
+			m_write.unlock();
 		}
 	}
 	catch (std::exception& e) {

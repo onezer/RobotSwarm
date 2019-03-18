@@ -58,23 +58,25 @@ void Robot::Look()
 void Robot::Compute()
 {
 
-	if (lookData[Map::direction::North] == 0) {
+	if (lookData[Map::direction::North] == 0 && nextMove != Map::direction::South) {
 		nextMove = Map::direction::North;
 	} 
-	else if (lookData[Map::direction::East] == 0) {
+	else if (lookData[Map::direction::East] == 0 && nextMove != Map::direction::West) {
 		nextMove = Map::direction::East;
 	}
-	else if (lookData[Map::direction::South] == 0) {
+	else if (lookData[Map::direction::South] == 0 && nextMove != Map::direction::North) {
 		nextMove = Map::direction::South;
 	}
-	else if (lookData[Map::direction::West] == 0) {
+	else if (lookData[Map::direction::West] == 0 && nextMove != Map::direction::East) {
 		nextMove = Map::direction::West;
 	}
 }
 
 void Robot::Move()
 {
-	Move(nextMove);
+	if (nextMove >= 0) {
+		Move(nextMove);
+	}
 }
 
 const std::_Atomic_uint Robot::getCount()

@@ -17,7 +17,6 @@ class Controller
 	static std::atomic_int threads_done[4];
 	static std::mutex m_write;
 	static std::mutex m_iter;
-	static bool CBDone;
 	static std::mutex m_terminate;
 
 	std::list<std::unique_ptr<Robot>>* robotList;
@@ -26,7 +25,7 @@ class Controller
 	MapGenerator* mapGenerator;
 
 	static void worker(int id, std::list<std::unique_ptr<Robot>>* robotList);
-	static void iterationCB(int i);
+	static void iterationCB(unsigned int i);
 	
 	int iteration;
 	int robotStartPos[3];
