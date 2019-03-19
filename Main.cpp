@@ -39,7 +39,7 @@ int main() {
 	for (int x = 0; x < 1; ++x) {
 		map->Clean();
 
-		controller->StartSimulation(pos);
+		controller->StartSimulation(pos,true);
 
 		controller->WaitForFinish();
 		//std::cout << x << ". simuation\n";

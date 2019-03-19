@@ -12,13 +12,13 @@ class Controller
 
 	static bool terminate;
 	static Controller* s_instance;
-	static int max_threads;
-	static int worker_num;
-	static std::atomic_int threads_done[4];
+	
 	static std::mutex m_write;
 	static std::mutex m_iter;
 	static std::mutex m_terminate;
 
+	int maxThreads;
+	int workerNum;
 	std::list<std::unique_ptr<Robot>>* robotList;
 	std::thread* workers;
 	Map* map;
@@ -27,8 +27,24 @@ class Controller
 	static void worker(int id, std::list<std::unique_ptr<Robot>>* robotList);
 	static void iterationCB(unsigned int i);
 	
-	int iteration;
+	int wait;
+	bool display;
 	int robotStartPos[3];
+
+
+	class Synchron {
+		const unsigned int threadNum;
+		std::atomic_int enter;
+		std::atomic_int exit;
+		std::atomic_int middle;
+		std::mutex mutex;
+	public:
+		Synchron(unsigned int threadNum);
+		void Synch(bool wait=false);
+	};
+
+	std::unique_ptr<Synchron> synchObj;
+
 
 public:
 	static Controller* Instance();
@@ -36,7 +52,7 @@ public:
 	void AddRobot(int* position);
 	void TerminateSimulation();
 	void WaitForFinish();
-	void StartSimulation(int* position);
+	void StartSimulation(int* position, bool display=false, int wait=500);
 	int getWorkerNum() const;
 
 };
