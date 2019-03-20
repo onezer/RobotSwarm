@@ -15,6 +15,8 @@
 
 class GoingSpiral : public iBehaviour {
 	Map::direction nextMove;
+	Map::direction prevMove;
+	bool move;
 
 	class GoingSpiralFactory : public iBehaviourFactory {
 	public:
@@ -35,27 +37,124 @@ public:
 		ret.push_back(Map::direction::East);
 		ret.push_back(Map::direction::West);
 		ret.push_back(Map::direction::South);
+		//std::cout << ret.size() << std::endl;
 		return ret;
 	}
 
 	void Compute(std::unordered_map<Map::direction, Map::NodeObj> lookData) {
-		if (lookData[Map::direction::North].GetType() == Map::nodeType::Free && nextMove != Map::direction::South) {
+		prevMove = nextMove;
+		move = true;
+
+		std::cout << "north: " << lookData[Map::direction::North].type << " south: " << lookData[Map::direction::South].type << " east: " << lookData[Map::direction::East].type << " west: " << lookData[Map::direction::South].type << std::endl;
+		if (
+			lookData[Map::direction::North].type == Map::nodeType::Free &&
+			lookData[Map::direction::East].type == Map::nodeType::Free &&
+			lookData[Map::direction::West].type == Map::nodeType::Free &&
+			lookData[Map::direction::South].type == Map::nodeType::Free 
+			) {
+			nextMove = Map::direction::West;
+		}
+		else if (
+			lookData[Map::direction::North].type == Map::nodeType::Free &&
+			lookData[Map::direction::East].type == Map::nodeType::Free &&
+			lookData[Map::direction::West].type == Map::nodeType::Free &&
+			lookData[Map::direction::South].type != Map::nodeType::Free
+			) {
+			nextMove = Map::direction::West;
+		}
+		else if (
+			lookData[Map::direction::North].type == Map::nodeType::Free &&
+			lookData[Map::direction::East].type == Map::nodeType::Free &&
+			lookData[Map::direction::West].type != Map::nodeType::Free &&
+			lookData[Map::direction::South].type == Map::nodeType::Free
+			) {
 			nextMove = Map::direction::North;
 		}
-		else if (lookData[Map::direction::East].GetType() == Map::nodeType::Free  && nextMove != Map::direction::West) {
-			nextMove = Map::direction::East;
-		}
-		else if (lookData[Map::direction::South].GetType() == Map::nodeType::Free  && nextMove != Map::direction::North) {
+		else if (
+			lookData[Map::direction::North].type == Map::nodeType::Free &&
+			lookData[Map::direction::East].type != Map::nodeType::Free &&
+			lookData[Map::direction::West].type == Map::nodeType::Free &&
+			lookData[Map::direction::South].type == Map::nodeType::Free
+			) {
 			nextMove = Map::direction::South;
 		}
-		else if (lookData[Map::direction::West].GetType() == Map::nodeType::Free  && nextMove != Map::direction::East) {
-			nextMove = Map::direction::West;
+		else if (
+			lookData[Map::direction::North].type != Map::nodeType::Free &&
+			lookData[Map::direction::East].type == Map::nodeType::Free &&
+			lookData[Map::direction::West].type == Map::nodeType::Free &&
+			lookData[Map::direction::South].type == Map::nodeType::Free
+			) {
+			nextMove = Map::direction::East;
+		}
+		else if (
+			lookData[Map::direction::North].type != Map::nodeType::Free &&
+			lookData[Map::direction::East].type != Map::nodeType::Free &&
+			lookData[Map::direction::West].type == Map::nodeType::Free &&
+			lookData[Map::direction::South].type == Map::nodeType::Free
+			) {
+			nextMove = Map::direction::South;
+		}
+		else if (
+			lookData[Map::direction::North].type == Map::nodeType::Free &&
+			lookData[Map::direction::East].type == Map::nodeType::Free &&
+			lookData[Map::direction::West].type != Map::nodeType::Free &&
+			lookData[Map::direction::South].type != Map::nodeType::Free
+			) {
+			nextMove = Map::direction::North;
+		}
+		else if (
+			lookData[Map::direction::North].type != Map::nodeType::Free &&
+			lookData[Map::direction::East].type == Map::nodeType::Free &&
+			lookData[Map::direction::West].type == Map::nodeType::Free &&
+			lookData[Map::direction::South].type != Map::nodeType::Free
+			) {
+			nextMove = prevMove;
+		}
+		else if (
+			lookData[Map::direction::North].type == Map::nodeType::Free &&
+			lookData[Map::direction::East].type != Map::nodeType::Free &&
+			lookData[Map::direction::West].type != Map::nodeType::Free &&
+			lookData[Map::direction::South].type == Map::nodeType::Free
+			) {
+			nextMove = prevMove;
+		}
+		else if (
+			lookData[Map::direction::North].type == Map::nodeType::Free &&
+			lookData[Map::direction::East].type != Map::nodeType::Free &&
+			lookData[Map::direction::West].type != Map::nodeType::Free &&
+			lookData[Map::direction::South].type != Map::nodeType::Free
+			) {
+			move = false;
+		}
+		else if (
+			lookData[Map::direction::North].type != Map::nodeType::Free &&
+			lookData[Map::direction::East].type == Map::nodeType::Free &&
+			lookData[Map::direction::West].type != Map::nodeType::Free &&
+			lookData[Map::direction::South].type != Map::nodeType::Free
+			) {
+			move = false;
+		}
+		else if (
+			lookData[Map::direction::North].type != Map::nodeType::Free &&
+			lookData[Map::direction::East].type != Map::nodeType::Free &&
+			lookData[Map::direction::West].type == Map::nodeType::Free &&
+			lookData[Map::direction::South].type != Map::nodeType::Free
+			) {
+			move = false;
+		}
+		else if (
+			lookData[Map::direction::North].type != Map::nodeType::Free &&
+			lookData[Map::direction::East].type != Map::nodeType::Free &&
+			lookData[Map::direction::West].type != Map::nodeType::Free &&
+			lookData[Map::direction::South].type == Map::nodeType::Free
+			) {
+			move = false;
 		}
 	}
 
 
 	std::pair<bool, Map::direction> Move() {
-		return std::pair<bool, Map::direction>(true, nextMove);
+		return std::pair<bool, Map::direction>(move, nextMove);
 	}
 
 	static std::unique_ptr<iBehaviourFactory> Factory() {
@@ -71,7 +170,7 @@ int main() {
 	MapGenerator* mapGenerator = MapGenerator::Instance();
 	Map* map = Map::Instance();
 
-	int size[2] = { 1000,300 };
+	int size[2] = { 300,100 };
 	//int size[2] = { 10,7 };
 
 	
@@ -94,10 +193,10 @@ int main() {
 
 	auto start = std::chrono::steady_clock::now();
 	mapGenerator->GenerateMap(Map::mapType::twoD, size, false, 12335);
-	for (int x = 0; x < 20; ++x) {
+	for (int x = 0; x < 1; ++x) {
 		map->Clean();
 
-		controller->StartSimulation(pos, GoingSpiral::Factory(), true,200,1);
+		controller->StartSimulation(pos, GoingSpiral::Factory(), true,500,1);
 
 		controller->WaitForFinish();
 		//std::cout << x << ". simuation\n";

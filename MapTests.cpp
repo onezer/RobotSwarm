@@ -7,9 +7,10 @@ TEST_CASE("Setting up a 2D map, placing a robot and moving it around") {
 	//Creating the map
 	Map* map = Map::Instance();
 	int size[] = { 5,5 };
-	std::atomic_int** mapArray = new std::atomic_int*[size[0]];
+	Map::NodeObj** mapArray;
+	mapArray = new Map::NodeObj*[size[0]];
 	for (int i = 0; i < size[0]; ++i) {
-		mapArray[i] = new std::atomic_int[size[1]];
+		((Map::NodeObj**)mapArray)[i] = new Map::NodeObj[size[1]];
 	}
 
 	//Initializing the map's node values to Free
@@ -24,17 +25,17 @@ TEST_CASE("Setting up a 2D map, placing a robot and moving it around") {
 
 	//Placing a robot to the (2,2) position
 	int position[2] = { 2,2 };
-	REQUIRE(map->PlaceRobot(position) == 0); //PlaceRobot() returns 0 if everything is OK
-	REQUIRE(map->PlaceRobot(position) == 1); //PlaceRobot() returns 1 if the position isn't free
+	REQUIRE(map->PlaceRobot(position,0) == 0); //PlaceRobot() returns 0 if everything is OK
+	REQUIRE(map->PlaceRobot(position,0) == 2); //PlaceRobot() returns 2 if the position is a robot
 
 	//Asserting that only 1 robot is placed and on the right position
 	for (int i = 0; i < size[0]; ++i) {
 		for (int j = 0; j < size[1]; ++j) {
 			if (j == 2 && i == 2) {
-				REQUIRE(mapArray[i][j] == Map::nodeType::Robot);
+				REQUIRE(mapArray[i][j].type == Map::nodeType::Robot);
 			}
 			else {
-				REQUIRE(mapArray[i][j] == Map::nodeType::Free);
+				REQUIRE(mapArray[i][j].type == Map::nodeType::Free);
 			}
 		}
 	}
@@ -46,10 +47,10 @@ TEST_CASE("Setting up a 2D map, placing a robot and moving it around") {
 		for (int i = 0; i < size[0]; ++i) {
 			for (int j = 0; j < size[1]; ++j) {
 				if (j == 3 && i == 2) {
-					REQUIRE(mapArray[i][j] == Map::nodeType::Robot);
+					REQUIRE(mapArray[i][j].type == Map::nodeType::Robot);
 				}
 				else {
-					REQUIRE(mapArray[i][j] == Map::nodeType::Free);
+					REQUIRE(mapArray[i][j].type == Map::nodeType::Free);
 				}
 			}
 		}
@@ -61,10 +62,10 @@ TEST_CASE("Setting up a 2D map, placing a robot and moving it around") {
 		for (int i = 0; i < size[0]; ++i) {
 			for (int j = 0; j < size[1]; ++j) {
 				if (j == 1 && i == 2) {
-					REQUIRE(mapArray[i][j] == Map::nodeType::Robot);
+					REQUIRE(mapArray[i][j].type == Map::nodeType::Robot);
 				}
 				else {
-					REQUIRE(mapArray[i][j] == Map::nodeType::Free);
+					REQUIRE(mapArray[i][j].type == Map::nodeType::Free);
 				}
 			}
 		}
@@ -76,10 +77,10 @@ TEST_CASE("Setting up a 2D map, placing a robot and moving it around") {
 		for (int i = 0; i < size[0]; ++i) {
 			for (int j = 0; j < size[1]; ++j) {
 				if (j == 2 && i == 3) {
-					REQUIRE(mapArray[i][j] == Map::nodeType::Robot);
+					REQUIRE(mapArray[i][j].type == Map::nodeType::Robot);
 				}
 				else {
-					REQUIRE(mapArray[i][j] == Map::nodeType::Free);
+					REQUIRE(mapArray[i][j].type == Map::nodeType::Free);
 				}
 			}
 		}
@@ -91,10 +92,10 @@ TEST_CASE("Setting up a 2D map, placing a robot and moving it around") {
 		for (int i = 0; i < size[0]; ++i) {
 			for (int j = 0; j < size[1]; ++j) {
 				if (j == 2 && i == 1) {
-					REQUIRE(mapArray[i][j] == Map::nodeType::Robot);
+					REQUIRE(mapArray[i][j].type == Map::nodeType::Robot);
 				}
 				else {
-					REQUIRE(mapArray[i][j] == Map::nodeType::Free);
+					REQUIRE(mapArray[i][j].type == Map::nodeType::Free);
 				}
 			}
 		}
@@ -125,9 +126,10 @@ TEST_CASE("Placing multiple robots on a 2D map, and moving them around") {
 	//Creating the map
 	Map* map = Map::Instance();
 	int size[] = { 5,5 };
-	std::atomic_int** mapArray = new std::atomic_int*[size[0]];
+	Map::NodeObj** mapArray;
+	mapArray = new Map::NodeObj*[size[0]];
 	for (int i = 0; i < size[0]; ++i) {
-		mapArray[i] = new std::atomic_int[size[1]];
+		((Map::NodeObj**)mapArray)[i] = new Map::NodeObj[size[1]];
 	}
 
 	//Initializing the map's node values to Free
@@ -143,17 +145,17 @@ TEST_CASE("Placing multiple robots on a 2D map, and moving them around") {
 	//the robots' positions
 	int positions[3][2] = { {0,0},{4,4},{2,2} };
 
-	REQUIRE(map->PlaceRobot(positions[0]) == 0);
-	REQUIRE(map->PlaceRobot(positions[1]) == 0);
-	REQUIRE(map->PlaceRobot(positions[2]) == 0);
+	REQUIRE(map->PlaceRobot(positions[0],5) == 0);
+	REQUIRE(map->PlaceRobot(positions[1],3) == 0);
+	REQUIRE(map->PlaceRobot(positions[2],2) == 0);
 
 	for (int i = 0; i < size[0]; ++i) {
 		for (int j = 0; j < size[1]; ++j) {
 			if(i==positions[0][0] && j == positions[0][1] || i == positions[1][0] && j == positions[1][1] || i == positions[2][0] && j == positions[2][1]){
-				REQUIRE(mapArray[i][j] == Map::nodeType::Robot);
+				REQUIRE(mapArray[i][j].type == Map::nodeType::Robot);
 			}
 			else {
-				REQUIRE(mapArray[i][j] == Map::nodeType::Free);
+				REQUIRE(mapArray[i][j].type == Map::nodeType::Free);
 			}
 		}
 	}
@@ -167,10 +169,10 @@ TEST_CASE("Placing multiple robots on a 2D map, and moving them around") {
 		for (int i = 0; i < size[0]; ++i) {
 			for (int j = 0; j < size[1]; ++j) {
 				if (i == 0 && j == 1 || i == 4 && j == 3 || i == 3 && j == 2) {
-					REQUIRE(mapArray[i][j] == Map::nodeType::Robot);
+					REQUIRE(mapArray[i][j].type == Map::nodeType::Robot);
 				}
 				else {
-					REQUIRE(mapArray[i][j] == Map::nodeType::Free);
+					REQUIRE(mapArray[i][j].type == Map::nodeType::Free);
 				}
 			}
 		}
@@ -208,10 +210,10 @@ TEST_CASE("Placing multiple robots on a 2D map, and moving them around") {
 		for (int i = 0; i < size[0]; ++i) {
 			for (int j = 0; j < size[1]; ++j) {
 				if (i == 0 && j == 0 || i == 4 && j == 4 || i == 2 && j == 2) {
-					REQUIRE(mapArray[i][j] == Map::nodeType::Robot);
+					REQUIRE(mapArray[i][j].type == Map::nodeType::Robot);
 				}
 				else {
-					REQUIRE(mapArray[i][j] != Map::nodeType::Robot);
+					REQUIRE(mapArray[i][j].type != Map::nodeType::Robot);
 				}
 			}
 		}
@@ -223,9 +225,10 @@ TEST_CASE("Creating a 2D map, placing a robot, test the Look() method around the
 	//Creating the map
 	Map* map = Map::Instance();
 	int size[] = { 5,5 };
-	std::atomic_int** mapArray = new std::atomic_int*[size[0]];
+	Map::NodeObj** mapArray;
+	mapArray = new Map::NodeObj*[size[0]];
 	for (int i = 0; i < size[0]; ++i) {
-		mapArray[i] = new std::atomic_int[size[1]];
+		((Map::NodeObj**)mapArray)[i] = new Map::NodeObj[size[1]];
 	}
 
 	//Initializing the map's node values to Free
@@ -240,13 +243,13 @@ TEST_CASE("Creating a 2D map, placing a robot, test the Look() method around the
 
 	//Placing a robot to the (2,2) position
 	int position[2] = { 2,2 };
-	REQUIRE(map->PlaceRobot(position) == 0);
+	REQUIRE(map->PlaceRobot(position,0) == 0);
 
 	SECTION("Every node around the robot is Free") {
-		REQUIRE(map->Look(position, Map::direction::North) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::South) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::North).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::South).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Free);
 	}
 
 	SECTION("Every node around the robot is Obstacle") {
@@ -255,10 +258,10 @@ TEST_CASE("Creating a 2D map, placing a robot, test the Look() method around the
 		mapArray[1][2] = Map::nodeType::Obstacle;
 		mapArray[3][2] = Map::nodeType::Obstacle;
 
-		REQUIRE(map->Look(position, Map::direction::North) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::South) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::North).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::South).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Obstacle);
 	}
 
 	SECTION("Every node around the robot is Robot") {
@@ -267,10 +270,10 @@ TEST_CASE("Creating a 2D map, placing a robot, test the Look() method around the
 		mapArray[1][2] = Map::nodeType::Robot;
 		mapArray[3][2] = Map::nodeType::Robot;
 
-		REQUIRE(map->Look(position, Map::direction::North) == Map::nodeType::Robot);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Robot);
-		REQUIRE(map->Look(position, Map::direction::South) == Map::nodeType::Robot);
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Robot);
+		REQUIRE(map->Look(position, Map::direction::North).type == Map::nodeType::Robot);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Robot);
+		REQUIRE(map->Look(position, Map::direction::South).type == Map::nodeType::Robot);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Robot);
 	}
 
 	SECTION("Different node-types around the robot") {
@@ -279,10 +282,10 @@ TEST_CASE("Creating a 2D map, placing a robot, test the Look() method around the
 		mapArray[1][2] = Map::nodeType::Free;
 		mapArray[3][2] = Map::nodeType::Robot;
 
-		REQUIRE(map->Look(position, Map::direction::North) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::South) == Map::nodeType::Robot);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Robot);
+		REQUIRE(map->Look(position, Map::direction::North).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::South).type == Map::nodeType::Robot);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Robot);
 	}
 
 	SECTION("Obstacles and robots not in neighbouring nodes") {
@@ -291,10 +294,10 @@ TEST_CASE("Creating a 2D map, placing a robot, test the Look() method around the
 		mapArray[3][3] = Map::nodeType::Robot;
 		mapArray[1][4] = Map::nodeType::Obstacle;
 
-		REQUIRE(map->Look(position, Map::direction::North) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::South) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::North).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::South).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Free);
 	}
 }
 
@@ -302,14 +305,12 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 	//Creating the map
 	Map* map = Map::Instance();
 	int size[] = { 5,5,5 };
-	std::atomic_int *** mapArray = new std::atomic_int**[size[0]];
-	for (int i = 0; i<size[0]; i++) {
-		mapArray[i] = new std::atomic_int*[size[1]];
-		for (int j = 0; j < size[1]; j++) {
-			mapArray[i][j] = new std::atomic_int[size[2]];
-			for (int k = 0; k<size[3]; k++) {
-				mapArray[i][j][k] = 0;
-			}
+	Map::NodeObj*** mapArray;
+	mapArray = new Map::NodeObj**[size[0]];
+	for (int i = 0; i < size[0]; ++i) {
+		((Map::NodeObj***)mapArray)[i] = new Map::NodeObj*[size[1]];
+		for (int j = 0; j < size[1]; ++j) {
+			((Map::NodeObj***)mapArray)[i][j] = new Map::NodeObj[size[2]];
 		}
 	}
 
@@ -326,16 +327,16 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 
 	SECTION("Moving 1 robot") {
 		int position[3] = {2,2,2};
-		REQUIRE(map->PlaceRobot(position) == 0);
+		REQUIRE(map->PlaceRobot(position,0) == 0);
 
 		for (int x = 0; x < size[0]; ++x) {
 			for (int y = 0; y < size[1]; ++y) {
 				for (int z = 0; z < size[2]; ++z) {
 					if (x == 2 && y == 2 && z == 2) {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Robot);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Robot);
 					}
 					else {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Free);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Free);
 					}
 				}
 			}
@@ -347,10 +348,10 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 			for (int y = 0; y < size[1]; ++y) {
 				for (int z = 0; z < size[2]; ++z) {
 					if (x == 2 && y == 2 && z == 3) {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Robot);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Robot);
 					}
 					else {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Free);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Free);
 					}
 				}
 			}
@@ -362,10 +363,10 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 			for (int y = 0; y < size[1]; ++y) {
 				for (int z = 0; z < size[2]; ++z) {
 					if (x == 2 && y == 2 && z == 2) {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Robot);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Robot);
 					}
 					else {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Free);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Free);
 					}
 				}
 			}
@@ -377,10 +378,10 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 			for (int y = 0; y < size[1]; ++y) {
 				for (int z = 0; z < size[2]; ++z) {
 					if (x == 3 && y == 2 && z == 2) {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Robot);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Robot);
 					}
 					else {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Free);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Free);
 					}
 				}
 			}
@@ -392,10 +393,10 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 			for (int y = 0; y < size[1]; ++y) {
 				for (int z = 0; z < size[2]; ++z) {
 					if (x == 2 && y == 2 && z == 2) {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Robot);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Robot);
 					}
 					else {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Free);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Free);
 					}
 				}
 			}
@@ -407,10 +408,10 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 			for (int y = 0; y < size[1]; ++y) {
 				for (int z = 0; z < size[2]; ++z) {
 					if (x == 2 && y == 3 && z == 2) {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Robot);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Robot);
 					}
 					else {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Free);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Free);
 					}
 				}
 			}
@@ -422,10 +423,10 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 			for (int y = 0; y < size[1]; ++y) {
 				for (int z = 0; z < size[2]; ++z) {
 					if (x == 2 && y == 2 && z == 2) {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Robot);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Robot);
 					}
 					else {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Free);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Free);
 					}
 				}
 			}
@@ -434,8 +435,8 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 
 	SECTION("Moving 2 robots") {
 		int position[2][3] = { { 2,2,2 } , {3,3,3} };
-		REQUIRE(map->PlaceRobot(position[0]) == 0);
-		REQUIRE(map->PlaceRobot(position[1]) == 0);
+		REQUIRE(map->PlaceRobot(position[0],0) == 0);
+		REQUIRE(map->PlaceRobot(position[1],9) == 0);
 
 		REQUIRE(map->Move(position[0], Map::direction::South) == 0);
 		REQUIRE(map->Move(position[1], Map::direction::South) == 0);
@@ -444,10 +445,10 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 			for (int y = 0; y < size[1]; ++y) {
 				for (int z = 0; z < size[2]; ++z) {
 					if (x == 2 && y == 1 && z == 2 || x == 3 && y == 2 && z == 3) {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Robot);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Robot);
 					}
 					else {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Free);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Free);
 					}
 				}
 			}
@@ -460,10 +461,10 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 			for (int y = 0; y < size[1]; ++y) {
 				for (int z = 0; z < size[2]; ++z) {
 					if (x == 2 && y == 2 && z == 2 || x == 3 && y == 3 && z == 3) {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Robot);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Robot);
 					}
 					else {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Free);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Free);
 					}
 				}
 			}
@@ -476,10 +477,10 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 			for (int y = 0; y < size[1]; ++y) {
 				for (int z = 0; z < size[2]; ++z) {
 					if (x == 2 && y == 2 && z == 3 || x == 3 && y == 3 && z == 4) {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Robot);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Robot);
 					}
 					else {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Free);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Free);
 					}
 				}
 			}
@@ -492,10 +493,10 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 			for (int y = 0; y < size[1]; ++y) {
 				for (int z = 0; z < size[2]; ++z) {
 					if (x == 2 && y == 2 && z == 2 || x == 3 && y == 3 && z == 3) {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Robot);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Robot);
 					}
 					else {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Free);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Free);
 					}
 				}
 			}
@@ -508,10 +509,10 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 			for (int y = 0; y < size[1]; ++y) {
 				for (int z = 0; z < size[2]; ++z) {
 					if (x == 3 && y == 2 && z == 2 || x == 4 && y == 3 && z == 3) {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Robot);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Robot);
 					}
 					else {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Free);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Free);
 					}
 				}
 			}
@@ -524,10 +525,10 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 			for (int y = 0; y < size[1]; ++y) {
 				for (int z = 0; z < size[2]; ++z) {
 					if (x == 2 && y == 2 && z == 2 || x == 3 && y == 3 && z == 3) {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Robot);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Robot);
 					}
 					else {
-						REQUIRE(mapArray[x][y][z] == Map::nodeType::Free);
+						REQUIRE(mapArray[x][y][z].type == Map::nodeType::Free);
 					}
 				}
 			}
@@ -537,55 +538,55 @@ TEST_CASE("Creating a 3D array placing robots, moving them around") {
 	SECTION("Testing the Look() method") {
 		int position[3] = { 2,2,2 };
 
-		REQUIRE(map->PlaceRobot(position) == 0);
+		REQUIRE(map->PlaceRobot(position,9) == 0);
 
 		mapArray[3][2][2] = Map::nodeType::Obstacle;
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::North) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::South) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::Up) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::Down) == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::North).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::South).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::Up).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::Down).type == Map::nodeType::Free);
 
 		mapArray[2][3][2] = Map::nodeType::Obstacle;
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::North) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::South) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::Up) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::Down) == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::North).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::South).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::Up).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::Down).type == Map::nodeType::Free);
 
 		mapArray[2][2][3] = Map::nodeType::Obstacle;
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::North) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::South) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::Up) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::Down) == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::North).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::South).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::Up).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::Down).type == Map::nodeType::Free);
 
 		mapArray[1][2][2] = Map::nodeType::Obstacle;
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::North) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::South) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::Up) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::Down) == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::North).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::South).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::Up).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::Down).type == Map::nodeType::Free);
 
 		mapArray[2][1][2] = Map::nodeType::Obstacle;
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::North) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::South) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::Up) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::Down) == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::North).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::South).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::Up).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::Down).type == Map::nodeType::Free);
 
 		mapArray[2][2][1] = Map::nodeType::Obstacle;
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::North) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::South) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::Up) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::Down) == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::North).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::South).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::Up).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::Down).type == Map::nodeType::Obstacle);
 	}
 
 	SECTION("Trying to collide with obstacle") {
@@ -616,9 +617,10 @@ TEST_CASE("Creating a hex map, placing robots and moving them around"){
 	//Creating the map
 	Map* map = Map::Instance();
 	int size[] = { 5,5 };
-	std::atomic_int** mapArray = new std::atomic_int*[size[0]];
+	Map::NodeObj** mapArray;
+	mapArray = new Map::NodeObj*[size[0]];
 	for (int i = 0; i < size[0]; ++i) {
-		mapArray[i] = new std::atomic_int[size[1]];
+		((Map::NodeObj**)mapArray)[i] = new Map::NodeObj[size[1]];
 	}
 
 	//Initializing the map's node values to Free
@@ -634,16 +636,16 @@ TEST_CASE("Creating a hex map, placing robots and moving them around"){
 	int position[2] = {2,2};
 
 	SECTION("Placing a robot, moving it") {
-		REQUIRE(map->PlaceRobot(position) == 0);
+		REQUIRE(map->PlaceRobot(position,0) == 0);
 
 		REQUIRE(map->Move(position, Map::direction::NorthWest) == 0);
 		for (int x = 0; x < size[0]; ++x) {
 			for (int y = 0; y < size[1]; y++) {
 				if (x == 1 && y == 3) {
-					REQUIRE(mapArray[x][y] == Map::nodeType::Robot);
+					REQUIRE(mapArray[x][y].type == Map::nodeType::Robot);
 				}
 				else {
-					REQUIRE(mapArray[x][y] == Map::nodeType::Free);
+					REQUIRE(mapArray[x][y].type == Map::nodeType::Free);
 				}
 			}
 		}
@@ -652,10 +654,10 @@ TEST_CASE("Creating a hex map, placing robots and moving them around"){
 		for (int x = 0; x < size[0]; ++x) {
 			for (int y = 0; y < size[1]; y++) {
 				if (x == 1 && y == 4) {
-					REQUIRE(mapArray[x][y] == Map::nodeType::Robot);
+					REQUIRE(mapArray[x][y].type == Map::nodeType::Robot);
 				}
 				else {
-					REQUIRE(mapArray[x][y] == Map::nodeType::Free);
+					REQUIRE(mapArray[x][y].type == Map::nodeType::Free);
 				}
 			}
 		}
@@ -665,10 +667,10 @@ TEST_CASE("Creating a hex map, placing robots and moving them around"){
 		for (int x = 0; x < size[0]; ++x) {
 			for (int y = 0; y < size[1]; y++) {
 				if (x == 2 && y == 2) {
-					REQUIRE(mapArray[x][y] == Map::nodeType::Robot);
+					REQUIRE(mapArray[x][y].type == Map::nodeType::Robot);
 				}
 				else {
-					REQUIRE(mapArray[x][y] == Map::nodeType::Free);
+					REQUIRE(mapArray[x][y].type == Map::nodeType::Free);
 				}
 			}
 		}
@@ -678,10 +680,10 @@ TEST_CASE("Creating a hex map, placing robots and moving them around"){
 		for (int x = 0; x < size[0]; ++x) {
 			for (int y = 0; y < size[1]; y++) {
 				if (x == 4 && y == 2) {
-					REQUIRE(mapArray[x][y] == Map::nodeType::Robot);
+					REQUIRE(mapArray[x][y].type == Map::nodeType::Robot);
 				}
 				else {
-					REQUIRE(mapArray[x][y] == Map::nodeType::Free);
+					REQUIRE(mapArray[x][y].type == Map::nodeType::Free);
 				}
 			}
 		}
@@ -691,72 +693,72 @@ TEST_CASE("Creating a hex map, placing robots and moving them around"){
 		for (int x = 0; x < size[0]; ++x) {
 			for (int y = 0; y < size[1]; y++) {
 				if (x == 2 && y == 2) {
-					REQUIRE(mapArray[x][y] == Map::nodeType::Robot);
+					REQUIRE(mapArray[x][y].type == Map::nodeType::Robot);
 				}
 				else {
-					REQUIRE(mapArray[x][y] == Map::nodeType::Free);
+					REQUIRE(mapArray[x][y].type == Map::nodeType::Free);
 				}
 			}
 		}
 	}
 
 	SECTION("Testing the Look() method") {
-		REQUIRE(map->PlaceRobot(position) == 0);
+		REQUIRE(map->PlaceRobot(position,5) == 0);
 		
-		REQUIRE(map->Look(position, Map::direction::NorthEast) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::NorthWest) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::SouthEast) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::SouthWest) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::NorthEast).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::NorthWest).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::SouthEast).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::SouthWest).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Free);
 
 		mapArray[2][3] = Map::nodeType::Obstacle;
-		REQUIRE(map->Look(position, Map::direction::NorthEast) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::NorthWest) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::SouthEast) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::SouthWest) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::NorthEast).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::NorthWest).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::SouthEast).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::SouthWest).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Free);
 
 		mapArray[1][3] = Map::nodeType::Obstacle;
-		REQUIRE(map->Look(position, Map::direction::NorthEast) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::NorthWest) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::SouthEast) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::SouthWest) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::NorthEast).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::NorthWest).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::SouthEast).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::SouthWest).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Free);
 
 		mapArray[2][1] = Map::nodeType::Obstacle;
-		REQUIRE(map->Look(position, Map::direction::NorthEast) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::NorthWest) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::SouthEast) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::SouthWest) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::NorthEast).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::NorthWest).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::SouthEast).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::SouthWest).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Free);
 
 		mapArray[3][1] = Map::nodeType::Obstacle;
-		REQUIRE(map->Look(position, Map::direction::NorthEast) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::NorthWest) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::SouthEast) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::SouthWest) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Free);
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::NorthEast).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::NorthWest).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::SouthEast).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::SouthWest).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Free);
 
 		mapArray[1][2] = Map::nodeType::Obstacle;
-		REQUIRE(map->Look(position, Map::direction::NorthEast) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::NorthWest) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::SouthEast) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::SouthWest) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Free);
+		REQUIRE(map->Look(position, Map::direction::NorthEast).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::NorthWest).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::SouthEast).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::SouthWest).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Free);
 
 		mapArray[3][2] = Map::nodeType::Obstacle;
-		REQUIRE(map->Look(position, Map::direction::NorthEast) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::NorthWest) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::SouthEast) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::SouthWest) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::West) == Map::nodeType::Obstacle);
-		REQUIRE(map->Look(position, Map::direction::East) == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::NorthEast).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::NorthWest).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::SouthEast).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::SouthWest).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::West).type == Map::nodeType::Obstacle);
+		REQUIRE(map->Look(position, Map::direction::East).type == Map::nodeType::Obstacle);
 	}
 
 	SECTION("Trying to collide with obstacle") {

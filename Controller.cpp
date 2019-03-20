@@ -97,7 +97,7 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 
 void Controller::iterationCB(unsigned int i)
 {
-	if (i % 2 == 1) {
+	if (i % 120 == 1) {
 		Controller::Instance()->AddRobot(Controller::Instance()->robotStartPos);
 	}
 
