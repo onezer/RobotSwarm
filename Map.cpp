@@ -14,14 +14,7 @@ Map * Map::Instance()
 
 void Map::SetMap(void* MapArray, mapType maptype, int* size)
 {
-	if (this->MapArray != nullptr) {
-		if (dimensions == 2) {
-			for (int i = 0; i < this->size[0]; ++i) {
-				delete[] ((std::atomic_int**)this->MapArray)[i];
-			}
-			delete[](std::atomic_int**)this->MapArray;
-		}
-	}
+	DeleteMap();
 
 	this->MapArray = MapArray;
 	this->maptype = maptype;
@@ -61,7 +54,7 @@ int Map::Move(int * position, direction direction)
 		throw new std::invalid_argument("Robot Move: invalid robot position, it's out of range!");
 	}
 
-	if (getNode(position) != nodeType::Robot) {
+	if (getNode(position).type != nodeType::Robot) {
 		throw new std::invalid_argument{ "Robot Move: invalid robot position, it's not a robot's position!" };
 	}
 
@@ -73,21 +66,28 @@ int Map::Move(int * position, direction direction)
 	}
 
 	m_Move.lock();
-	if (getNode(newPos) == nodeType::Free) {
-		setNode(newPos, nodeType::Robot);
-		setNode(position, nodeType::Free);
-		std::memcpy(position, newPos, dimensions*sizeof(int));
-	}
-	else {
+	try {
+		if (getNode(newPos).type == nodeType::Free) {
+			setNode(newPos, NodeObj(nodeType::Robot, getNode(position).id));
+			setNode(position, NodeObj(nodeType::Free));
+			std::memcpy(position, newPos, dimensions * sizeof(int));
+		}
+		else {
+			m_Move.unlock();
+			return 1; //collision
+		}
 		m_Move.unlock();
-		return 1; //collision
 	}
-	m_Move.unlock();
+	catch (std::exception& e) {
+		std::cout << e.what() << ": Move\n";
+		m_Move.unlock();
+		throw;
+	}
 
 	return 0;
 }
 
-int Map::Look(int * position, direction direction)
+Map::NodeObj Map::Look(int * position, direction direction)
 {
 	if (!ValidDir(direction)) {
 		throw new std::invalid_argument("Robot Look: invalid direction!");
@@ -98,11 +98,12 @@ int Map::Look(int * position, direction direction)
 	}
 
 	try {
-		if (getNode(position) != nodeType::Robot) {
+		if (getNode(position).type != nodeType::Robot) {
 			throw new std::invalid_argument{ "Robot Look: invalid robot position, it's not a robot's position!" };
 		}
 	}
 	catch (std::invalid_argument) {
+		std::cout << "MapLook";
 		throw;
 	}
 
@@ -112,6 +113,7 @@ int Map::Look(int * position, direction direction)
 		Transform(position, direction, newPos);
 	}
 	catch (std::invalid_argument) {
+		std::cout << "MapLook";
 		throw;
 	}
 
@@ -119,27 +121,28 @@ int Map::Look(int * position, direction direction)
 		return nodeType::Obstacle;
 	}
 
-	int node;
+	NodeObj node;
 
 	try {
 		node = getNode(newPos);
 	}
 	catch (std::invalid_argument) {
+		std::cout << "MapLook";
 		throw;
 	}
 
 	return node;
 }
 
-int Map::PlaceRobot(int * position)
+int Map::PlaceRobot(const int * position, unsigned int id)
 {
 	if (!ValidPos(position)) {
 		throw new std::invalid_argument("PlaceRobot: invalid robot position, it's out of range!");
 	}
 
 	try {
-		if (getNode(position) != nodeType::Free) {
-			if (getNode(position) == nodeType::Robot) {
+		if (getNode(position).type != nodeType::Free) {
+			if (getNode(position).type == nodeType::Robot) {
 				return 2;
 			}
 			else {
@@ -147,33 +150,36 @@ int Map::PlaceRobot(int * position)
 			}
 		}
 	}
-	catch (std::invalid_argument) {
+	catch (std::invalid_argument& e) {
+		std::cerr << e.what()<<std::endl;
 		throw;
 	}
 
 	try {
-		setNode(position, nodeType::Robot);
+		setNode(position, NodeObj(nodeType::Robot, id));
 	}
-	catch (std::invalid_argument) {
+	catch (std::invalid_argument& e) {
+		std::cerr << e.what() << std::endl;
 		throw;
 	}
 	return 0;
 }
 
-int Map::RemoveRobot(int * position)
+int Map::RemoveRobot(const int * position)
 {
 	if (!ValidPos(position)) {
 		throw new std::invalid_argument("RemoveRobot: invalid robot position, it's out of range!");
 	}
 
-	if (getNode(position) != nodeType::Robot) {
+	if (getNode(position).type != nodeType::Robot) {
 		return 1;
 	}
 
 	try {
-		setNode(position, nodeType::Free);
+		setNode(position, NodeObj(nodeType::Free));
 	}
 	catch (std::invalid_argument) {
+		std::cout << "RemoveRobot";
 		throw;
 	}
 
@@ -185,8 +191,8 @@ void Map::Clean()
 	if (dimensions == 2) {
 		for (int y = size[1] - 1; y >= 0; --y) {
 			for (int x = 0; x < size[0]; ++x) {
-				if (((std::atomic_int**)MapArray)[x][y] == nodeType::Robot) {
-					((std::atomic_int**)MapArray)[x][y] = nodeType::Free;
+				if (static_cast<Map::NodeObj**>(MapArray)[x][y].type == nodeType::Robot) {
+					static_cast<Map::NodeObj**>(MapArray)[x][y] = NodeObj(nodeType::Free);
 				}
 			}
 		}
@@ -195,8 +201,8 @@ void Map::Clean()
 		for (int y = size[1] - 1; y >= 0; --y) {
 			for (int x = 0; x < size[0]; ++x) {
 				for (int z = 0; z < size[2]; z++) {
-					if (((std::atomic_int***)MapArray)[x][y][z] == nodeType::Robot) {
-						((std::atomic_int***)MapArray)[x][y][z] = nodeType::Free;
+					if (static_cast<Map::NodeObj***>(MapArray)[x][y][z].type == nodeType::Robot) {
+						static_cast<Map::NodeObj***>(MapArray)[x][y][z] = NodeObj(nodeType::Free);
 					}
 				}
 				
@@ -220,7 +226,7 @@ void Map::DisplayMap() const
 {
 	/*for (int y = size[1] - 1; y >= 0; --y) {
 		for (int x = 0; x < size[0]; ++x) {
-			switch (((std::atomic_int**)MapArray)[x][y]) {
+			switch (((NodeObj**)MapArray)[x][y]) {
 			case 0: std::cout << "-"; break;
 			case 1: std::cout << "X"; break;
 			case 2: std::cout << "O"; break;
@@ -240,23 +246,25 @@ void Map::DisplayMap() const
 
 	for (int y = 0; y < size[1]; ++y) {
 		for (int x = 0; x < size[0]; ++x) {
-			switch (((std::atomic_int**)MapArray)[x][y]) {
-			case 0: 
+			m_Access.lock();
+			switch (((NodeObj**)MapArray)[x][y].type) {
+			case 0:
 				cvSetReal2D(redchannel, size[1] - y - 1, x, 0);
 				cvSetReal2D(greenchannel, size[1] - y - 1, x, 0);
 				cvSetReal2D(bluechannel, size[1] - y - 1, x, 0);
 				break;
-			case 1: 
+			case 1:
 				cvSetReal2D(redchannel, size[1] - y - 1, x, 124);
 				cvSetReal2D(greenchannel, size[1] - y - 1, x, 68);
 				cvSetReal2D(bluechannel, size[1] - y - 1, x, 42);
 				break;
-			case 2: 
+			case 2:
 				cvSetReal2D(redchannel, size[1] - y - 1, x, 255);
 				cvSetReal2D(greenchannel, size[1] - y - 1, x, 0);
 				cvSetReal2D(bluechannel, size[1] - y - 1, x, 0);
 				break;
 			}
+			m_Access.unlock();
 		}
 	}
 
@@ -277,49 +285,44 @@ Map::Map()
 	*size = { 0 };
 
 	MapArray = nullptr;
-
-	
 }
 
-
-Map::~Map()
-{
-	if (this->MapArray != nullptr) {
-		if (dimensions == 2) {
-			for (int i = 0; i < this->size[0]; ++i) {
-				delete[]((std::atomic_int**)this->MapArray)[i];
-			}
-			delete[](std::atomic_int**)this->MapArray;
-		}
-	}
-}
-
-int Map::getNode(int * position) const
+Map::NodeObj Map::getNode(const int * position) const
 {
 	if (!ValidPos(position)) {
 		throw new std::invalid_argument("GetNode: Invalid position!");
 	}
 
+	m_Access.lock();
 	if (dimensions == 2) {
-		return ((std::atomic_int**)MapArray)[position[0]][position[1]];
+		NodeObj obj = static_cast<Map::NodeObj**>(MapArray)[position[0]][position[1]];
+		m_Access.unlock();
+		return obj;
 	}
-	else {
-		return ((std::atomic_int***)MapArray)[position[0]][position[1]][position[2]];
+	else if(dimensions == 3){
+		NodeObj obj = static_cast<Map::NodeObj***>(MapArray)[position[0]][position[1]][position[2]];
+		m_Access.unlock();
+		return obj;
 	}
+	
 }
 
-void Map::setNode(int * position, nodeType type)
+void Map::setNode(const int * position, const NodeObj& obj)
 {
+	
 	if (!ValidPos(position)) {
 		throw new std::invalid_argument("SetNode: Invalid position!");
 	}
+	
 
+	m_Access.lock();
 	if (dimensions == 2) {
-		((std::atomic_int**)MapArray)[position[0]][position[1]] = type;
+		static_cast<Map::NodeObj**>(MapArray)[position[0]][position[1]] = obj;
 	}
 	else {
-		((std::atomic_int***)MapArray)[position[0]][position[1]][position[2]] = type;
+		static_cast<Map::NodeObj***>(MapArray)[position[0]][position[1]][position[2]] = obj;
 	}
+	m_Access.unlock();
 }
 
 void Map::Transform(int * position, direction direction, int* newPosition) const
@@ -354,7 +357,7 @@ void Map::Transform(int * position, direction direction, int* newPosition) const
 	}
 }
 
-bool Map::ValidPos(int * position) const
+bool Map::ValidPos(const int * position) const
 {
 	for (int i = 0; i < dimensions; ++i) {
 		if (position[i] < 0) {
@@ -405,4 +408,43 @@ bool Map::ValidDir(direction direction) const {
 		break;
 	}
 	
+}
+
+void Map::DeleteMap()
+{
+	if (this->MapArray != nullptr) {
+		if (dimensions == 2) {
+			for (int i = 0; i < this->size[0]; ++i) {
+				delete[]static_cast<NodeObj**>(this->MapArray)[i];
+			}
+			delete[]static_cast<NodeObj**>(this->MapArray);
+		}
+		else if (dimensions == 3) {
+			for (int i = 0; i < size[0]; ++i) {
+				for (int j = 0; j < size[1]; ++j) {
+					delete[]static_cast<Map::NodeObj***>(this->MapArray)[i][j];
+				}
+				delete[]static_cast<Map::NodeObj***>(this->MapArray)[i];
+			}
+			delete[] static_cast<Map::NodeObj***>(this->MapArray);
+		}
+	}
+}
+
+Map::NodeObj::NodeObj():type(Map::nodeType::Free),id(0)
+{
+}
+
+Map::NodeObj::NodeObj(nodeType type, unsigned int id): type(type), id(id)
+{
+}
+
+Map::nodeType Map::NodeObj::GetType() const
+{
+	return type;
+}
+
+unsigned int Map::NodeObj::GetId() const
+{
+	return id;
 }

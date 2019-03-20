@@ -5,6 +5,8 @@
 #include"Map.h"
 #include"Robot.h"
 #include"MapGenerator.h"
+#include"iBehaviourFactory.h"
+#include"iBehaviour.h"
 
 class Controller
 {
@@ -24,6 +26,8 @@ class Controller
 	Map* map;
 	MapGenerator* mapGenerator;
 
+	std::unique_ptr<iBehaviourFactory> behaviourFactory;
+
 	static void worker(int id, std::list<std::unique_ptr<Robot>>* robotList);
 	static void iterationCB(unsigned int i);
 	
@@ -37,7 +41,6 @@ class Controller
 		std::atomic_int enter;
 		std::atomic_int exit;
 		std::atomic_int middle;
-		std::mutex mutex;
 	public:
 		Synchron(unsigned int threadNum);
 		void Synch(bool wait=false);
@@ -52,7 +55,7 @@ public:
 	void AddRobot(int* position);
 	void TerminateSimulation();
 	void WaitForFinish();
-	void StartSimulation(int* position, bool display=false, int wait=500);
+	void StartSimulation(int* position, std::unique_ptr<iBehaviourFactory> behaviourFactory, bool display=false, int wait=500);
 	int getWorkerNum() const;
 
 };

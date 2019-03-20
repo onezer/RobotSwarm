@@ -3,6 +3,8 @@
 #include<iostream>
 #include<atomic>
 #include "Map.h"
+#include"iBehaviour.h"
+#include"iBehaviourFactory.h"
 
 class Controller;
 class Map;
@@ -10,7 +12,7 @@ class Map;
 class Robot
 {
 	static std::_Atomic_uint count;
-	unsigned int ID;
+	unsigned int id;
 	Map* map;
 	Controller* controller;
 
@@ -19,9 +21,9 @@ class Robot
 	void Move(Map::direction);
 	void Look(Map::direction);
 
-	int lookData[10];
+	std::unordered_map<Map::direction, Map::NodeObj> lookData;
 
-	Map::direction nextMove;
+	std::unique_ptr<iBehaviour> behaviour;
 
 public:
 
@@ -30,6 +32,6 @@ public:
 	void Move();
 	static const std::_Atomic_uint getCount();
 	unsigned int getID();
-	Robot(unsigned int id, int* position);
+	Robot(unsigned int id, int* position, std::unique_ptr<iBehaviour> behaviour);
 	~Robot();
 };

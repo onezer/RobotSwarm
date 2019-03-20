@@ -1,12 +1,70 @@
 #include<iostream>
+#include<memory>
 #include<list>
 #include<thread>
+#include<vector>
 #include<mutex>
 #include<chrono>
 #include<atomic>
 #include<time.h>
 #include"Controller.h"
 #include"MapGenerator.h"
+#include"iBehaviour.h"
+#include"iBehaviourFactory.h"
+
+
+class GoingSpiral : public iBehaviour {
+	Map::direction nextMove;
+
+	class GoingSpiralFactory : public iBehaviourFactory {
+	public:
+		std::unique_ptr<iBehaviour> CreateBehaviour(unsigned int id) {
+			return std::make_unique<GoingSpiral>(id);
+		}
+	};
+
+public:
+	GoingSpiral(unsigned int id)
+	{
+		this->id = id;
+	}
+
+	std::vector<Map::direction> Look() {
+		std::vector<Map::direction> ret = std::vector<Map::direction>();
+		ret.push_back(Map::direction::North);
+		ret.push_back(Map::direction::East);
+		ret.push_back(Map::direction::West);
+		ret.push_back(Map::direction::South);
+		return ret;
+	}
+
+	void Compute(std::unordered_map<Map::direction, Map::NodeObj> lookData) {
+		if (lookData[Map::direction::North].GetType() == Map::nodeType::Free && nextMove != Map::direction::South) {
+			nextMove = Map::direction::North;
+		}
+		else if (lookData[Map::direction::East].GetType() == Map::nodeType::Free  && nextMove != Map::direction::West) {
+			nextMove = Map::direction::East;
+		}
+		else if (lookData[Map::direction::South].GetType() == Map::nodeType::Free  && nextMove != Map::direction::North) {
+			nextMove = Map::direction::South;
+		}
+		else if (lookData[Map::direction::West].GetType() == Map::nodeType::Free  && nextMove != Map::direction::East) {
+			nextMove = Map::direction::West;
+		}
+	}
+
+
+	std::pair<bool, Map::direction> Move() {
+		return std::pair<bool, Map::direction>(true, nextMove);
+	}
+
+	static std::unique_ptr<iBehaviourFactory> Factory() {
+		return std::make_unique<GoingSpiralFactory>();
+	}
+};
+
+
+
 int main() { 
 
 	Controller* controller = Controller::Instance();
@@ -36,10 +94,10 @@ int main() {
 
 	auto start = std::chrono::steady_clock::now();
 	mapGenerator->GenerateMap(Map::mapType::twoD, size, false, 12335);
-	for (int x = 0; x < 1; ++x) {
+	for (int x = 0; x < 100; ++x) {
 		map->Clean();
 
-		controller->StartSimulation(pos,true);
+		controller->StartSimulation(pos, GoingSpiral::Factory(), false);
 
 		controller->WaitForFinish();
 		//std::cout << x << ". simuation\n";
@@ -53,4 +111,6 @@ int main() {
 	
 
 	std::cout << "DONE\n" << "Simulation time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " milliseconds\n"; 
+
+	std::getchar();
 }

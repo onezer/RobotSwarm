@@ -6,7 +6,7 @@ class MapGenerator
 
 	static MapGenerator* s_instance;
 	void* mapArray;
-	void RandomFillMap(bool randomSeed, unsigned int seed);
+	void RandomFillMap();
 	void SmoothMap();
 	int GetSurroundingWallCount(int gridX, int gridY);
 	Map::mapType type;
