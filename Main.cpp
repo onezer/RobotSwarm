@@ -71,7 +71,7 @@ int main() {
 	MapGenerator* mapGenerator = MapGenerator::Instance();
 	Map* map = Map::Instance();
 
-	int size[2] = { 300,75 };
+	int size[2] = { 300,30000 };
 	//int size[2] = { 10,7 };
 
 	
@@ -94,10 +94,10 @@ int main() {
 
 	auto start = std::chrono::steady_clock::now();
 	mapGenerator->GenerateMap(Map::mapType::twoD, size, false, 12335);
-	for (int x = 0; x < 100; ++x) {
+	for (int x = 0; x < 20; ++x) {
 		map->Clean();
 
-		controller->StartSimulation(pos, GoingSpiral::Factory(), false);
+		controller->StartSimulation(pos, GoingSpiral::Factory(), false,200,8);
 
 		controller->WaitForFinish();
 		//std::cout << x << ". simuation\n";

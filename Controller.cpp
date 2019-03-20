@@ -7,6 +7,7 @@ Controller* Controller::s_instance;
 std::mutex Controller::m_write;
 std::mutex Controller::m_iter;
 std::mutex Controller::m_terminate;
+std::atomic_int Controller::threads_done[4];
 
 bool Controller::terminate=false;
 
@@ -15,14 +16,10 @@ Controller::Controller()
 	maxThreads = std::thread::hardware_concurrency() == 1 ? 2 : std::thread::hardware_concurrency();
 	workerNum = maxThreads - 1;
 
-	synchObj = std::make_unique<Synchron>(workerNum);
-
 	map = Map::Instance();
 	mapGenerator = MapGenerator::Instance();
 
-	workers = new std::thread[workerNum];
-
-	robotList = new std::list<std::unique_ptr<Robot>>[workerNum];
+	
 
 	terminate = false;
 }
@@ -45,7 +42,8 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 
 	Controller* controller = Controller::Instance();
 
-	controller->synchObj->Synch(controller->display);
+	++threads_done[3];
+	while (threads_done[3] != controller->workerNum && !terminate);
 
 	while (!terminate) {
 		++i;
@@ -54,7 +52,9 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 			iterationCB(i);
 		}
 
-		controller->synchObj->Synch(controller->display);
+		++threads_done[0];
+		while (threads_done[0] != controller->workerNum && !terminate);
+		threads_done[3] = 0;
 
 		if (!terminate) {
 			LCM(robotList, Look);
@@ -65,7 +65,10 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 		std::cout << "Thread #" << id << " is done with stage1\n";
 		m_write.unlock();*/
 
-		controller->synchObj->Synch(controller->display);
+		++threads_done[1];
+		while (threads_done[1] != controller->workerNum && !terminate);
+		threads_done[0] = 0;
+
 		if (!terminate) {
 			LCM(robotList, Compute);
 		}
@@ -74,7 +77,10 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 		std::cout << "Thread #" << id << " is done with stage2\n";
 		m_write.unlock();*/
 
-		controller->synchObj->Synch(controller->display);
+		++threads_done[2];
+		while (threads_done[2] != controller->workerNum && !terminate);
+		threads_done[1] = 0;
+
 		if (!terminate) {
 			LCM(robotList, Move);
 		}
@@ -83,7 +89,9 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 		std::cout << "Thread #" << id << " is done with stage3\n";
 		m_write.unlock();*/
 
-		controller->synchObj->Synch(controller->display);
+		++threads_done[3];
+		while (threads_done[3] != controller->workerNum && !terminate);
+		threads_done[2] = 0;
 	}
 }
 
@@ -170,8 +178,23 @@ void Controller::WaitForFinish()
 	}
 }
 
-void Controller::StartSimulation(int* position, std::unique_ptr<iBehaviourFactory> bFactory, bool display, int wait)
+void Controller::StartSimulation(int* position, std::unique_ptr<iBehaviourFactory> bFactory, bool display, int wait, unsigned int threadNum)
 {
+	if (threadNum) {
+		workerNum = threadNum;
+	}
+	synchObj = std::make_unique<Synchron>(workerNum);
+	std::fill(threads_done, threads_done + 4, 0);
+
+	if (workers == nullptr) {
+		workers = new std::thread[workerNum];
+	}
+
+	if (robotList == nullptr) {
+		robotList = new std::list<std::unique_ptr<Robot>>[workerNum];
+	}
+	
+
 	behaviourFactory = std::move(bFactory);
 	terminate = false;
 	this->display = display;

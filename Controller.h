@@ -18,6 +18,7 @@ class Controller
 	static std::mutex m_write;
 	static std::mutex m_iter;
 	static std::mutex m_terminate;
+	static std::atomic_int threads_done[4];
 
 	int maxThreads;
 	int workerNum;
@@ -55,7 +56,7 @@ public:
 	void AddRobot(int* position);
 	void TerminateSimulation();
 	void WaitForFinish();
-	void StartSimulation(int* position, std::unique_ptr<iBehaviourFactory> behaviourFactory, bool display=false, int wait=500);
+	void StartSimulation(int* position, std::unique_ptr<iBehaviourFactory> behaviourFactory, bool display=false, int wait=500, unsigned int threadNum = 0);
 	int getWorkerNum() const;
 
 };

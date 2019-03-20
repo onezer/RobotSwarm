@@ -238,7 +238,7 @@ void Map::DisplayMap() const
 	std::cout << std::endl;*/
 	
 	IplImage* img = cvCreateImage(cvSize(size[0], size[1]), 8, 3);
-	IplImage* big = cvCreateImage(cvSize(size[0] * 5, size[1] * 7), 8, 3);
+	IplImage* big = cvCreateImage(cvSize(1300,600), 8, 3);
 
 	IplImage* redchannel = cvCreateImage(cvGetSize(img), 8, 1);
 	IplImage* greenchannel = cvCreateImage(cvGetSize(img), 8, 1);
@@ -246,7 +246,7 @@ void Map::DisplayMap() const
 
 	for (int y = 0; y < size[1]; ++y) {
 		for (int x = 0; x < size[0]; ++x) {
-			m_Access.lock();
+			//m_Access.lock();
 			switch (((NodeObj**)MapArray)[x][y].type) {
 			case 0:
 				cvSetReal2D(redchannel, size[1] - y - 1, x, 0);
@@ -264,7 +264,7 @@ void Map::DisplayMap() const
 				cvSetReal2D(bluechannel, size[1] - y - 1, x, 0);
 				break;
 			}
-			m_Access.unlock();
+			//m_Access.unlock();
 		}
 	}
 
@@ -292,18 +292,16 @@ Map::NodeObj Map::getNode(const int * position) const
 	if (!ValidPos(position)) {
 		throw new std::invalid_argument("GetNode: Invalid position!");
 	}
-
-	m_Access.lock();
+	NodeObj obj;
+	//m_Access.lock();
 	if (dimensions == 2) {
-		NodeObj obj = static_cast<Map::NodeObj**>(MapArray)[position[0]][position[1]];
-		m_Access.unlock();
-		return obj;
+		obj = static_cast<Map::NodeObj**>(MapArray)[position[0]][position[1]];
 	}
 	else if(dimensions == 3){
-		NodeObj obj = static_cast<Map::NodeObj***>(MapArray)[position[0]][position[1]][position[2]];
-		m_Access.unlock();
-		return obj;
+		obj = static_cast<Map::NodeObj***>(MapArray)[position[0]][position[1]][position[2]];
 	}
+	//m_Access.unlock();
+	return obj;
 	
 }
 
@@ -315,14 +313,14 @@ void Map::setNode(const int * position, const NodeObj& obj)
 	}
 	
 
-	m_Access.lock();
+	//m_Access.lock();
 	if (dimensions == 2) {
 		static_cast<Map::NodeObj**>(MapArray)[position[0]][position[1]] = obj;
 	}
 	else {
 		static_cast<Map::NodeObj***>(MapArray)[position[0]][position[1]][position[2]] = obj;
 	}
-	m_Access.unlock();
+	//m_Access.unlock();
 }
 
 void Map::Transform(int * position, direction direction, int* newPosition) const

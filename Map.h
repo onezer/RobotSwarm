@@ -10,7 +10,7 @@ class Map
 	int dimensions;
 	
 	mutable std::mutex m_Move;
-	mutable std::mutex m_Access;
+	//mutable std::mutex m_Access;
 
 public:
 	enum nodeType {Free, Obstacle, Robot, Nest, Resource};
