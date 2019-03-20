@@ -143,6 +143,7 @@ void Controller::AddRobot(int* position)
 	try {
 		int success = map->PlaceRobot(position,count);
 		if (success == 0) {
+			if(!terminate)
 			robotList[count % workerNum].push_back(std::make_unique<Robot>(count, position, behaviourFactory->CreateBehaviour(count)));
 		}
 		else if (success == 1) {

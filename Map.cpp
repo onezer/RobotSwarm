@@ -278,6 +278,9 @@ void Map::DisplayMap() const
 	cvWaitKey(1);
 	cvReleaseImage(&img);
 	cvReleaseImage(&big);
+	cvReleaseImage(&redchannel);
+	cvReleaseImage(&greenchannel);
+	cvReleaseImage(&bluechannel);
 }
 
 Map::Map()
