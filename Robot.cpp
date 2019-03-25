@@ -59,9 +59,6 @@ void Robot::Look()
 
 void Robot::Compute()
 {
-	std::cout << "robot\n";
-	std::cout << "north: " << lookData[Map::direction::North].type << " south: " << lookData[Map::direction::South].type << " east: " << lookData[Map::direction::East].type << " west: " << lookData[Map::direction::South].type << std::endl;
-
 	behaviour->Compute(lookData);
 }
 

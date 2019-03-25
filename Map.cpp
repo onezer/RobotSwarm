@@ -67,13 +67,18 @@ int Map::Move(int * position, direction direction)
 
 	m_Move.lock();
 	try {
+		std::cout << "Robot["<< getNode(position).id <<"] tries to move from [" << position[0] << "," << position[1] << "] to [" << newPos[0] << "," << newPos[1]<<"]\n";
+
 		if (getNode(newPos).type == nodeType::Free) {
 			setNode(newPos, NodeObj(nodeType::Robot, getNode(position).id));
 			setNode(position, NodeObj(nodeType::Free));
+
+			std::cout << "Successfully moved from [" << position[0] << "," << position[1] << "] to [" << newPos[0] << "," << newPos[1] << "]\n";
 			std::memcpy(position, newPos, dimensions * sizeof(int));
 		}
 		else {
 			m_Move.unlock();
+			std::cout << "Collided at [" << newPos[0] << "," << newPos[1] << "]\n";
 			return 1; //collision
 		}
 		m_Move.unlock();
@@ -143,6 +148,7 @@ int Map::PlaceRobot(const int * position, unsigned int id)
 	try {
 		if (getNode(position).type != nodeType::Free) {
 			if (getNode(position).type == nodeType::Robot) {
+				
 				return 2;
 			}
 			else {
@@ -157,6 +163,7 @@ int Map::PlaceRobot(const int * position, unsigned int id)
 
 	try {
 		setNode(position, NodeObj(nodeType::Robot, id));
+		std::cout << "Robot created at [" << position[0] << "," << position[1] << "] with id: " << id << "\n";
 	}
 	catch (std::invalid_argument& e) {
 		std::cerr << e.what() << std::endl;
@@ -407,7 +414,11 @@ bool Map::ValidDir(direction direction) const {
 		default: return false; break;
 		}
 		break;
+	default: {
+		return false;
 	}
+	}
+	
 	
 }
 

@@ -39,9 +39,9 @@ class Controller
 
 	class Synchron {
 		const unsigned int threadNum;
-		std::atomic_int enter;
-		std::atomic_int exit;
-		std::atomic_int middle;
+		std::atomic_uint enter;
+		std::atomic_uint exit;
+		std::atomic_uint middle;
 	public:
 		Synchron(unsigned int threadNum);
 		void Synch(bool wait=false);
@@ -52,7 +52,6 @@ class Controller
 
 public:
 	static Controller* Instance();
-	void WriteRobots() const;
 	void AddRobot(int* position);
 	void TerminateSimulation();
 	void WaitForFinish();

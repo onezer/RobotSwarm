@@ -19,7 +19,6 @@ Controller::Controller()
 	map = Map::Instance();
 	mapGenerator = MapGenerator::Instance();
 
-	
 
 	terminate = false;
 }
@@ -97,7 +96,8 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 
 void Controller::iterationCB(unsigned int i)
 {
-	if (i % 120 == 1) {
+	std::cout << "\nIeration: " << i << std::endl;
+	if (i % 2 == 1) {
 		Controller::Instance()->AddRobot(Controller::Instance()->robotStartPos);
 	}
 
@@ -119,47 +119,40 @@ Controller * Controller::Instance()
 	return s_instance;
 }
 
-void Controller::WriteRobots() const
-{
-	/*
-	m_write.lock();
-	for (int i = 0; i < worker_num; ++i) {
-		int j = 0;
-		for (auto it = robotList[i].begin(); it != robotList[i].end(); it++) {
-			std::cout << "Robot[" << i << ":" << j << "] Look: " << (*it).look << std::endl;
-			std::cout << "Robot[" << i << ":" << j << "] Compute: " << (*it).compute << std::endl;
-			std::cout << "Robot[" << i << ":" << j << "] Move: " << (*it).move << std::endl;
-			j++;
-		}
-	}
-	m_write.unlock(); */
-}
-
 void Controller::AddRobot(int* position)
 {
 	unsigned int count = Robot::getCount();
 
 	
 	try {
-		int success = map->PlaceRobot(position,count);
+		int success;
+		try {
+			success = map->PlaceRobot(position, count);
+		}
+		catch (std::invalid_argument e) {
+			std::cerr << "AddRobot: " << e.what() << std::endl;
+		}
 		if (success == 0) {
-			if(!terminate)
-			robotList[count % workerNum].push_back(std::make_unique<Robot>(count, position, behaviourFactory->CreateBehaviour(count)));
+			if (!terminate) {
+				robotList[count % workerNum].push_back(std::make_unique<Robot>(count, position, behaviourFactory->CreateBehaviour(count)));
+
+			}
+			
 		}
 		else if (success == 1) {
 			terminate = true;
 			m_write.lock();
-			std::cout << "Robot placed on obstacle\n";
+			std::cout << "Terminated: Robot placed on obstacle\n";
 			m_write.unlock();
 		}
 		else if (success == 2) {
 			terminate = true;
 			m_write.lock();
-			std::cout << "Robot placed on robot\n";
+			std::cout << "Terminated: Robot placed on robot\n";
 			m_write.unlock();
 		}
 	}
-	catch (std::exception& e) {
+	catch (std::invalid_argument e) {
 		m_write.lock();
 		std::cerr << e.what() << ":AddRobot\n";
 		m_write.unlock();
