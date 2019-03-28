@@ -6,7 +6,7 @@ The current robot model is full synchron with Look Compute Move phases executing
 ### Look phase
 The robots gather sensory information about their surroundings (currently from the direct neighbouring nodes/cells)
 
-###Compute phase 
+### Compute phase 
 The robots calculate their next move
 
 ### Move phase 
