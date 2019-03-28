@@ -1,6 +1,6 @@
 ## Robot Swarm Simulator
 
-This a simulator to simulate multiple robots in a 2D or 3D environment.
+This is a simulator to simulate multiple robots in a 2D or 3D environment.
 The current robot model is full synchron with Look Compute Move phases executing at the same time.
 
 ### Look phase
