@@ -23,12 +23,13 @@ Controller::Controller()
 	terminate = false;
 }
 
+//Thread function
 void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 {
 	enum Task { Look, Compute, Move };
 
 	unsigned int i = 0;
-
+	//Calling the assigned robots' methods
 	auto LCM = [](std::list<std::unique_ptr<Robot>>* robotList, Task task) {
 		for (auto it = robotList->begin(); it != robotList->end(); it++) {
 			switch (task) {
@@ -51,6 +52,7 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 			iterationCB(i);
 		}
 
+		//Synchronization of threads
 		++threads_done[0];
 		while (threads_done[0] != controller->workerNum && !terminate);
 		threads_done[3] = 0;

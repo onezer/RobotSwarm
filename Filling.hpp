@@ -1,3 +1,5 @@
+
+//A simple robot algorithm for testing the simulator
 class Filling : public iBehaviour {
 	Map::direction nextMove;
 	Map::direction prevMove;

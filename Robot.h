@@ -9,6 +9,7 @@
 class Controller;
 class Map;
 
+//Represents the robots in the simulation
 class Robot
 {
 	static std::_Atomic_uint count;

@@ -119,6 +119,7 @@ void MapGenerator::GenerateMap(Map::mapType type, int * size, bool randomSeed, u
 
 	std::memcpy(this->size, size, dimensions * sizeof(int));
 
+	//If a mapArray is already allocated with the same size, then use that
 	mapArray = Map::Instance()->Recycle(size);
 	
 	if (mapArray == nullptr) {

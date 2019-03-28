@@ -1,6 +1,8 @@
 #pragma once
 #include <mutex>
 
+//Singleton class th is responsible for managing the map
+//The robots use its methods to look and move around the map
 class Map
 {
 	Map();
@@ -10,7 +12,6 @@ class Map
 	int dimensions;
 	
 	mutable std::mutex m_Move;
-	//mutable std::mutex m_Access;
 
 public:
 	enum nodeType {Free, Obstacle, Robot, Nest, Resource};
@@ -38,8 +39,8 @@ public:
 	int RemoveRobot(const int* position);
 
 	void Clean();
-	void* Recycle(int* size);
-	void DisplayMap() const;
+	void* Recycle(int* size); //Returning the allocated array pointer, if it's the same size as the parameter
+	void DisplayMap() const; //Displaying the map with OpenCV every iteration
 
 private:
 	mapType maptype;

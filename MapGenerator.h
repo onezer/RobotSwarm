@@ -1,5 +1,7 @@
 #pragma once
 #include"Map.h"
+
+//Singleton class that procedurally generates map with given parameters
 class MapGenerator
 {
 	MapGenerator();

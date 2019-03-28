@@ -193,6 +193,7 @@ int Map::RemoveRobot(const int * position)
 	return 0;
 }
 
+//Remove every robot from the map
 void Map::Clean()
 {
 	if (dimensions == 2) {
@@ -229,6 +230,7 @@ void * Map::Recycle(int * size)
 	return MapArray;
 }
 
+//Displaying every iteration with OpenCV
 void Map::DisplayMap() const
 {
 	/*for (int y = size[1] - 1; y >= 0; --y) {

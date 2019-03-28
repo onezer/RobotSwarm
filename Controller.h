@@ -8,6 +8,7 @@
 #include"iBehaviourFactory.h"
 #include"iBehaviour.h"
 
+//Singleton class that is repsonsible for controlling the simulation
 class Controller
 {
 	Controller();
