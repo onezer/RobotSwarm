@@ -142,13 +142,13 @@ void Controller::AddRobot(int* position)
 			
 		}
 		else if (success == 1) {
-			terminate = true;
+			TerminateSimulation();
 			m_write.lock();
 			std::cout << "Terminated: Robot placed on obstacle\n";
 			m_write.unlock();
 		}
 		else if (success == 2) {
-			terminate = true;
+			TerminateSimulation();
 			m_write.lock();
 			std::cout << "Terminated: Robot placed on robot\n";
 			m_write.unlock();
@@ -165,6 +165,10 @@ void Controller::AddRobot(int* position)
 void Controller::TerminateSimulation()
 {
 	terminate = true;
+	for (int i = 0; i < workerNum; ++i) {
+		if (robotList[i].size())
+			robotList[i].clear();
+	}
 }
 
 void Controller::WaitForFinish()
@@ -198,10 +202,7 @@ void Controller::StartSimulation(int* position, std::unique_ptr<iBehaviourFactor
 
 	std::memcpy(robotStartPos,position,map->getDimensions()*sizeof(int));
 
-	for (int i = 0; i < workerNum; ++i) {
-		if(robotList[i].size())
-			robotList[i].clear();
-	}
+	
 
 	for (int i = 0; i < workerNum; ++i) {
 		workers[i] = std::thread(&Controller::worker, i, &(robotList[i]));
