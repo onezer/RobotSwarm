@@ -34,8 +34,8 @@ The behaviour's factory class must implement this interface.
 
 ### Incoming features
 #### XML file generation
-The simulator will generate an XML file parallel to the simulation, that can be used to visualize the simulation steps in Unity
-This will help with debugging more complex robot algorithm, and visualizing 3D maps
+The simulator will generate an XML file parallel to the simulation, that can be used to visualize the simulation steps in Unity.
+This will help with debugging more complex robot algorithms, and visualizing 3D maps.
 
 #### MapGenerator improvements
 The MapGenerator will define the starting position, and support multiple robot swarm problems.
