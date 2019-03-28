@@ -26,6 +26,12 @@ Singleton class, responsible for procedurally generating the map.
 #### Robot
 This class represents the robots in the simulation. It's behaviour is defined by the behaviour class, that implements the iBehaviour interface. That class defines the algorithm that the robots should use.
 
+#### iBehaviour
+Every class that defines the robots' behaviour/algorithm must implement this interface.
+
+#### iBehaviourFactory
+The behaviour's factory class must implement this interface.
+
 ### Incoming features
 #### XML file generation
 The simulator will generate an XML file parallel to the simulation, that can be used to visualize the simulation steps in Unity
