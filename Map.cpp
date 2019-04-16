@@ -2,6 +2,7 @@
 #include<iostream>
 #include <cv.h>
 #include <highgui.h>
+#include <string>
 
 Map* Map::s_instance;
 
@@ -42,6 +43,65 @@ int Map::getType() const
 const int* Map::getSize() const
 {
 	return size;
+}
+
+std::string Map::getXML() const
+{
+	std::string retString;
+
+	if (dimensions == 2) {
+		for (int y = 0; y < size[1]; ++y) {
+			for (int x = 0; x < size[0]; ++x) {
+				Map::NodeObj obj = static_cast<Map::NodeObj**>(MapArray)[x][y];
+				if (obj.type != nodeType::Free) {
+					retString += "<node>\n";
+					retString += "<x>" + std::to_string(x) + "</x>\n";
+					retString += "<y>" + std::to_string(y) + "</y>\n";
+					
+					if (obj.type == nodeType::Obstacle)
+					{
+						retString += "<type>obstacle</type>\n";
+					}
+					else if (obj.type == nodeType::Nest) {
+						retString += "<type id=\"" + std::to_string(obj.id) + "\">nest</type>\n";
+					}
+					else if (obj.type == nodeType::Resource) {
+						retString += "<type id=\"" + std::to_string(obj.id) + "\">resource</type>\n";
+					}
+					retString += "</node>\n";
+				}
+			}
+		}
+	}
+	else if (dimensions == 3) {
+		for (int y = 0; y < size[1]; ++y) {
+			for (int x = 0; x < size[0]; ++x) {
+				for (int z = 0; z < size[2]; ++z) {
+					Map::NodeObj obj = static_cast<Map::NodeObj***>(MapArray)[x][y][z];
+					if (obj.type != nodeType::Free) {
+						retString += "<node>\n";
+						retString += "<x>" + std::to_string(x) + "</x>\n";
+						retString += "<y>" + std::to_string(y) + "</y>\n";
+						retString += "<z>" + std::to_string(y) + "</z>\n";
+
+						if (obj.type == nodeType::Obstacle)
+						{
+							retString += "<type>obstacle</type>\n";
+						}
+						else if (obj.type == nodeType::Nest) {
+							retString += "<type id=\"" + std::to_string(obj.id) + "\">nest</type>\n";
+						}
+						else if (obj.type == nodeType::Resource) {
+							retString += "<type id=\"" + std::to_string(obj.id) + "\">resource</type>\n";
+						}
+						retString += "</node>\n";
+					}
+				}
+			}
+		}
+	}
+
+	return retString;
 }
 
 int Map::Move(int * position, direction direction)
@@ -197,7 +257,7 @@ int Map::RemoveRobot(const int * position)
 void Map::Clean()
 {
 	if (dimensions == 2) {
-		for (int y = size[1] - 1; y >= 0; --y) {
+		for (int y = 0; y < size[1]; ++y) {
 			for (int x = 0; x < size[0]; ++x) {
 				if (static_cast<Map::NodeObj**>(MapArray)[x][y].type == nodeType::Robot) {
 					static_cast<Map::NodeObj**>(MapArray)[x][y] = NodeObj(nodeType::Free);
@@ -206,9 +266,9 @@ void Map::Clean()
 		}
 	}
 	else if (dimensions == 3) {
-		for (int y = size[1] - 1; y >= 0; --y) {
+		for (int y = 0; y < size[1]; ++y) {
 			for (int x = 0; x < size[0]; ++x) {
-				for (int z = 0; z < size[2]; z++) {
+				for (int z = 0; z < size[2]; ++z) {
 					if (static_cast<Map::NodeObj***>(MapArray)[x][y][z].type == nodeType::Robot) {
 						static_cast<Map::NodeObj***>(MapArray)[x][y][z] = NodeObj(nodeType::Free);
 					}
@@ -276,6 +336,7 @@ void Map::DisplayMap() const
 			//m_Access.unlock();
 		}
 	}
+	
 
 	cvMerge(bluechannel, greenchannel, redchannel, NULL, img);
 

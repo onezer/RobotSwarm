@@ -98,7 +98,7 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 
 void Controller::iterationCB(unsigned int i)
 {
-	std::cout << "\nIeration: " << i << std::endl;
+	std::cout << "\nIteration: " << i << std::endl;
 	if (i % 2 == 1) {
 		Controller::Instance()->AddRobot(Controller::Instance()->robotStartPos);
 	}

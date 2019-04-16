@@ -32,6 +32,7 @@ public:
 	int getDimensions() const;
 	int getType() const;
 	const int* getSize() const;
+	std::string getXML() const;
 
 	int Move(int* position, direction direction);
 	NodeObj Look(int* position, direction direction);
