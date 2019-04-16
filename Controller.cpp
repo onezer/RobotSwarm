@@ -4,12 +4,6 @@
 
 Controller* Controller::s_instance;
 
-std::mutex Controller::m_write;
-std::mutex Controller::m_iter;
-std::mutex Controller::m_terminate;
-std::atomic_int Controller::threads_done[4];
-
-bool Controller::terminate=false;
 
 Controller::Controller()
 {
@@ -40,10 +34,10 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 		}
 	};
 
-	Controller* controller = Controller::Instance();
+	//Controller* controller = Controller::Instance();
 
 	++threads_done[3];
-	while (threads_done[3] != controller->workerNum && !terminate);
+	while (threads_done[3] != workerNum && !terminate);
 
 	while (!terminate) {
 		++i;
@@ -54,7 +48,7 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 
 		//Synchronization of threads
 		++threads_done[0];
-		while (threads_done[0] != controller->workerNum && !terminate);
+		while (threads_done[0] != workerNum && !terminate);
 		threads_done[3] = 0;
 
 		if (!terminate) {
@@ -67,7 +61,7 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 		m_write.unlock();*/
 
 		++threads_done[1];
-		while (threads_done[1] != controller->workerNum && !terminate);
+		while (threads_done[1] != workerNum && !terminate);
 		threads_done[0] = 0;
 
 		if (!terminate) {
@@ -79,7 +73,7 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 		m_write.unlock();*/
 
 		++threads_done[2];
-		while (threads_done[2] != controller->workerNum && !terminate);
+		while (threads_done[2] != workerNum && !terminate);
 		threads_done[1] = 0;
 
 		if (!terminate) {
@@ -91,7 +85,7 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 		m_write.unlock();*/
 
 		++threads_done[3];
-		while (threads_done[3] != controller->workerNum && !terminate);
+		while (threads_done[3] != workerNum && !terminate);
 		threads_done[2] = 0;
 	}
 }
@@ -205,7 +199,7 @@ void Controller::StartSimulation(int* position, std::unique_ptr<iBehaviourFactor
 	
 
 	for (int i = 0; i < workerNum; ++i) {
-		workers[i] = std::thread(&Controller::worker, i, &(robotList[i]));
+		workers[i] = std::thread(&Controller::worker, this, i, &(robotList[i]));
 		/*m_write.lock();
 		std::cout << "Worker #" << i << " created\n";
 		m_write.unlock();*/

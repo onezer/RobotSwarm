@@ -13,13 +13,13 @@ class Controller
 {
 	Controller();
 
-	static bool terminate;
+	bool terminate;
 	static Controller* s_instance;
 	
-	static std::mutex m_write;
-	static std::mutex m_iter;
-	static std::mutex m_terminate;
-	static std::atomic_int threads_done[4];
+	std::mutex m_write;
+	std::mutex m_iter;
+	std::mutex m_terminate;
+	std::atomic_int threads_done[4];
 
 	int maxThreads;
 	int workerNum;
@@ -30,8 +30,8 @@ class Controller
 
 	std::unique_ptr<iBehaviourFactory> behaviourFactory;
 
-	static void worker(int id, std::list<std::unique_ptr<Robot>>* robotList);
-	static void iterationCB(unsigned int i);
+	void worker(int id, std::list<std::unique_ptr<Robot>>* robotList);
+	void iterationCB(unsigned int i);
 	
 	int wait;
 	bool display;
