@@ -28,7 +28,9 @@ void FileWriter::PushToBuffer(Iteration& i)
 
 bool FileExists(const std::string& name) {
 	std::ifstream f(name.c_str());
-	return f.good();
+	bool ret = f.good();
+	f.close();
+	return ret;
 }
 
 std::string IterationToXML(const Iteration& it) {
@@ -43,6 +45,13 @@ std::string IterationToXML(const Iteration& it) {
 		retString += "<x>" + std::to_string(robot.x) + "</x>\n";
 		retString += "<y>" + std::to_string(robot.y) + "</y>\n";
 		retString += "<z>" + std::to_string(robot.z) + "</z>\n";
+		retString += "<type>";
+		switch (robot.type) {
+		case RobotPosition::Type::Creation: retString += "creation"; break;
+		case RobotPosition::Type::Move: retString += "move"; break;
+		case RobotPosition::Type::Collision: retString += "collision"; break;
+		}
+		retString += "</type>\n";
 		retString += "</robot>\n";
 	}
 
@@ -98,7 +107,7 @@ void FileWriter::StartWriting(const std::string& name)
 	std::ofstream file;
 	file.open(fileName);
 	file << "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>\n";
-	file << "<simulation>\n";
+	file << "<simulation name=\"" + name + "\">\n";
 	
 	file << "<map>\n";
 	file << MapToXML();
@@ -111,8 +120,8 @@ void FileWriter::StartWriting(const std::string& name)
 			buffer.pop();
 		}
 	}
-
 	file << "</simulation>";
+	
 	file.close();
 }
 
@@ -161,6 +170,6 @@ void swap(Iteration& first, Iteration& second)
 
 }
 
-RobotPosition::RobotPosition(int x, int y, int z, unsigned int id):x{x},y{y},z{z},id{id}
+RobotPosition::RobotPosition(int x, int y, int z, unsigned int id, Type type):x{x},y{y},z{z},id{id}, type{type}
 {
 }

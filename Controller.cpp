@@ -40,11 +40,6 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 	while (threads_done[3] != workerNum && !terminate);
 
 	while (!terminate) {
-		++i;
-
-		if (id == 0 && !terminate) {
-			iterationCB(i);
-		}
 
 		//Synchronization of threads
 		++threads_done[0];
@@ -87,6 +82,12 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 		++threads_done[3];
 		while (threads_done[3] != workerNum && !terminate);
 		threads_done[2] = 0;
+
+		if (id == 0 && !terminate) {
+			iterationCB(i);
+		}
+
+		++i;
 	}
 }
 
@@ -98,13 +99,14 @@ void Controller::iterationCB(unsigned int i)
 	}
 
     //m_write.lock();
-	if (Controller::Instance()->display) {
+	if (display) {
 		Map::Instance()->DisplayMap();
 		std::this_thread::sleep_for(std::chrono::milliseconds(Controller::Instance()->wait));
 	}
 	//m_write.unlock();
 
-	
+	FileWriter::Instance()->PushToBuffer(*currentIteration);
+	currentIteration = new Iteration(i+1);
 }
 
 
@@ -196,7 +198,7 @@ void Controller::StartSimulation(int* position, std::unique_ptr<iBehaviourFactor
 
 	std::memcpy(robotStartPos,position,map->getDimensions()*sizeof(int));
 
-	
+	currentIteration = new Iteration(0);
 
 	for (int i = 0; i < workerNum; ++i) {
 		workers[i] = std::thread(&Controller::worker, this, i, &(robotList[i]));

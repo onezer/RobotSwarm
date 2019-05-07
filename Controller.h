@@ -7,6 +7,7 @@
 #include"MapGenerator.h"
 #include"iBehaviourFactory.h"
 #include"iBehaviour.h"
+#include"FileWriter.h"
 
 //Singleton class that is repsonsible for controlling the simulation
 class Controller
@@ -52,11 +53,12 @@ class Controller
 
 
 public:
+	
 	static Controller* Instance();
 	void AddRobot(int* position);
 	void TerminateSimulation();
 	void WaitForFinish();
 	void StartSimulation(int* position, std::unique_ptr<iBehaviourFactory> behaviourFactory, bool display=false, int wait=500, unsigned int threadNum = 0);
 	int getWorkerNum() const;
-
+	Iteration* currentIteration;
 };

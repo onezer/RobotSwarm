@@ -48,8 +48,8 @@ int main() {
 	int size[2] = { 3,3 };
 	mapGenerator->GenerateMap(Map::mapType::twoD, size, false, 10);
 
-	RobotPosition pos1(1, 2, 3, 1);
-	RobotPosition pos2(2, 1, 3, 2);
+	RobotPosition pos1(1, 2, 3, 1, RobotPosition::Type::Creation);
+	RobotPosition pos2(2, 1, 3, 2, RobotPosition::Type::Creation);
 
 	Iteration* it1 = new Iteration(1);
 	it1->positions->push_back(pos1);
@@ -58,6 +58,8 @@ int main() {
 	Iteration* it2 = new Iteration(2);
 	pos1.x = 2;
 	pos2.y = 2;
+	pos1.type = RobotPosition::Type::Move;
+	pos2.type = RobotPosition::Type::Move;
 	it2->positions->push_back(pos1);
 	it2->positions->push_back(pos2);
 
@@ -65,6 +67,7 @@ int main() {
 	writer->PushToBuffer(*it2);
 	
 	std::thread writing(&FileWriter::StartWriting, writer, "testing");
+	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	writer->StopWriting();
 
 	writing.join();

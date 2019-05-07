@@ -11,7 +11,12 @@ struct RobotPosition {
 
 	unsigned int id;
 
-	RobotPosition(int x, int y, int z, unsigned int id);
+	enum Type { Creation, Move, Collision };
+
+	Type type;
+
+	RobotPosition(int x, int y, int z, unsigned int id, Type type);
+
 };
 
 struct Iteration {

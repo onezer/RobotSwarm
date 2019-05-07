@@ -15,6 +15,9 @@ Robot::Robot(unsigned int id, int* position, std::unique_ptr<iBehaviour> behavio
 	std::memcpy(this->position,position, Map::Instance()->getDimensions()*sizeof(int));
 
 	++count;
+
+	RobotPosition filePos(position[0], position[1], position[2], id, RobotPosition::Type::Creation);
+	Controller::Instance()->currentIteration->positions->push_back(filePos);
 }
 
 

@@ -3,6 +3,8 @@
 #include <cv.h>
 #include <highgui.h>
 #include <string>
+#include"FileWriter.h"
+#include"Controller.h"
 
 Map* Map::s_instance;
 
@@ -121,7 +123,12 @@ int Map::Move(int * position, direction direction)
 	int newPos[3];
 
 	Transform(position, direction, newPos);
+
+	RobotPosition filePos(newPos[0], newPos[1], newPos[2], getNode(position).id, RobotPosition::Type::Move);
+
 	if(!ValidPos(newPos)){
+		filePos.type = RobotPosition::Type::Collision;
+		Controller::Instance()->currentIteration->positions->push_back(filePos);
 		return 2; // movement out of range
 	}
 
@@ -134,9 +141,16 @@ int Map::Move(int * position, direction direction)
 			setNode(position, NodeObj(nodeType::Free));
 
 			std::cout << "Successfully moved from [" << position[0] << "," << position[1] << "] to [" << newPos[0] << "," << newPos[1] << "]\n";
+
 			std::memcpy(position, newPos, dimensions * sizeof(int));
+
+			Controller::Instance()->currentIteration->positions->push_back(filePos);
 		}
 		else {
+
+			filePos.type = RobotPosition::Type::Collision;
+			Controller::Instance()->currentIteration->positions->push_back(filePos);
+
 			m_Move.unlock();
 			std::cout << "Collided at [" << newPos[0] << "," << newPos[1] << "]\n";
 			return 1; //collision
