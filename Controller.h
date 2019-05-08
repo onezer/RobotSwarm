@@ -5,39 +5,61 @@
 #include"Map.h"
 #include"Robot.h"
 #include"MapGenerator.h"
+#include"iBehaviourFactory.h"
+#include"iBehaviour.h"
+#include"FileWriter.h"
 
+//Singleton class that is repsonsible for controlling the simulation
 class Controller
 {
 	Controller();
 
-	static bool terminate;
+	bool terminate;
 	static Controller* s_instance;
-	static int max_threads;
-	static int worker_num;
-	static std::atomic_int threads_done[4];
-	static std::mutex m_write;
-	static std::mutex m_iter;
-	static bool CBDone;
-	static std::mutex m_terminate;
+	
+	std::mutex m_write;
+	std::mutex m_iter;
+	std::mutex m_terminate;
+	std::atomic_int threads_done[4];
 
+	int maxThreads;
+	int workerNum;
 	std::list<std::unique_ptr<Robot>>* robotList;
 	std::thread* workers;
+	std::thread* writer;
 	Map* map;
 	MapGenerator* mapGenerator;
 
-	static void worker(int id, std::list<std::unique_ptr<Robot>>* robotList);
-	static void iterationCB(int i);
+	std::unique_ptr<iBehaviourFactory> behaviourFactory;
+
+	void worker(int id, std::list<std::unique_ptr<Robot>>* robotList);
+	void iterationCB(unsigned int i);
 	
-	int iteration;
+	int wait;
+	bool display;
 	int robotStartPos[3];
 
+
+	class Synchron {
+		const unsigned int threadNum;
+		std::atomic_uint enter;
+		std::atomic_uint exit;
+		std::atomic_uint middle;
+	public:
+		Synchron(unsigned int threadNum);
+		void Synch(bool wait=false);
+	};
+
+	std::unique_ptr<Synchron> synchObj;
+
+
 public:
+	
 	static Controller* Instance();
-	void WriteRobots() const;
 	void AddRobot(int* position);
 	void TerminateSimulation();
 	void WaitForFinish();
-	void StartSimulation(int* position);
+	void StartSimulation(int* position, std::unique_ptr<iBehaviourFactory> behaviourFactory, bool display=false, int wait=500, unsigned int threadNum = 0);
 	int getWorkerNum() const;
-
+	Iteration* currentIteration;
 };

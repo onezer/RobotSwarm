@@ -1,56 +1,74 @@
 #include<iostream>
+#include<memory>
 #include<list>
 #include<thread>
+#include<vector>
 #include<mutex>
 #include<chrono>
 #include<atomic>
 #include<time.h>
 #include"Controller.h"
 #include"MapGenerator.h"
+#include"iBehaviour.h"
+#include"iBehaviourFactory.h"
+#include"Filling.hpp"
+#include"Map.h"
+#include"FileWriter.h"
+#include<string>
+
 int main() { 
 
 	Controller* controller = Controller::Instance();
 	MapGenerator* mapGenerator = MapGenerator::Instance();
 	Map* map = Map::Instance();
 
-	//int size[2] = { 300,75 };
-	int size[2] = { 10,7 };
-
-	
-
-	std::atomic_int** mapArray = new std::atomic_int*[size[0]];
-	for (int i = 0; i < size[0]; ++i) {
-		((std::atomic_int**)mapArray)[i] = new std::atomic_int[size[1]];
-	}
-
-	for (int i = 0; i < size[0]; ++i) {
-		for (int j = 0; j < size[1]; ++j) {
-			mapArray[i][j] = 0;
-		}
-	}
-
-	map->SetMap(mapArray, Map::mapType::twoD, size);
-
-	//int pos[2] = { 100,25 };
-	int pos[2] = { 0,0 };
+	int size[2] = { 50,40 };
+	int pos[2] = { 40,15 };
+	mapGenerator->GenerateMap(Map::mapType::twoD, size, false, 12335);
 
 	auto start = std::chrono::steady_clock::now();
-	//mapGenerator->GenerateMap(Map::mapType::twoD, size, false, 12335);
-	for (int x = 0; x < 1000; ++x) {
+	for (int x = 0; x < 1; ++x) {
 		map->Clean();
 
-		controller->StartSimulation(pos);
+		controller->StartSimulation(pos, Filling::Factory());
 
 		controller->WaitForFinish();
-		//std::cout << x << ". simuation\n";
+
+		std::cout << "robot count: " << Robot::getCount() << std::endl;
+		std::cout << x << ". simuation\n";
 	}
-
-
-	//std::cout << std::endl << Robot::getCount() << " robots\n";
-
 	auto end = std::chrono::steady_clock::now();
-
 	
+	std::cout << "DONE\n" << "Simulation time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " milliseconds\n";
 
-	std::cout << "DONE\n" << "Simulation time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " milliseconds\n"; 
+	/*FileWriter* writer = FileWriter::Instance();
+	MapGenerator* mapGenerator = MapGenerator::Instance();
+	Map* nap = Map::Instance();
+
+	int size[2] = { 3,3 };
+	mapGenerator->GenerateMap(Map::mapType::twoD, size, false, 10);
+
+	RobotPosition pos1(1, 2, 3, 1, RobotPosition::Type::Creation);
+	RobotPosition pos2(2, 1, 3, 2, RobotPosition::Type::Creation);
+
+	Iteration* it1 = new Iteration(1);
+	it1->positions->push_back(pos1);
+	it1->positions->push_back(pos2);
+
+	Iteration* it2 = new Iteration(2);
+	pos1.x = 2;
+	pos2.y = 2;
+	pos1.type = RobotPosition::Type::Move;
+	pos2.type = RobotPosition::Type::Move;
+	it2->positions->push_back(pos1);
+	it2->positions->push_back(pos2);
+
+	writer->PushToBuffer(*it1);
+	writer->PushToBuffer(*it2);
+	
+	std::thread writing(&FileWriter::StartWriting, writer, "testing");
+	std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	writer->StopWriting();
+
+	writing.join();*/
 }

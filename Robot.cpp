@@ -1,20 +1,23 @@
 #include "Robot.h"
 #include"Controller.h"
+#include<vector>
+#include<unordered_map>
+#include<vector>
 
 
 std::_Atomic_uint Robot::count;
 
-Robot::Robot(unsigned int id, int* position) : ID{ id }
+Robot::Robot(unsigned int id, int* position, std::unique_ptr<iBehaviour> behaviour) : id{ id }, behaviour{std::move(behaviour)}
 {
 	map = Map::Instance();
 	controller = Controller::Instance();
-	for (int i = 0; i < 10; ++i) {
-		lookData[i] = -1;
-	}
 
 	std::memcpy(this->position,position, Map::Instance()->getDimensions()*sizeof(int));
 
 	++count;
+
+	RobotPosition filePos(position[0], position[1], position[2], id, RobotPosition::Type::Creation);
+	Controller::Instance()->currentIteration->positions->push_back(filePos);
 }
 
 
@@ -29,52 +32,45 @@ void Robot::Move(Map::direction direction)
 		int result = map->Move(position, direction);
 		if (result != 0) {
 			controller->TerminateSimulation();
-			std::cout << "Simulation terminated: Robot with ID:" << ID << " collided!\n";
+			std::cout << "Simulation terminated: Robot with ID:" << id << " collided!\n";
 		}
 	}
-	catch (std::invalid_argument& e) {
-		std::cout << e.what();
+	catch (std::exception& e) {
+		std::cerr << e.what() << ":move\n";
+		throw;
 	}
 }
 
 void Robot::Look(Map::direction direction)
 {
 	try {
-		lookData[direction] = map->Look(position, direction);
+		lookData.insert_or_assign(direction, map->Look(position, direction));
 	}
-	catch (std::invalid_argument& e) {
-		std::cout << e.what();
+	catch (std::exception& e) {
+		std::cerr << e.what() << ":Look\n";
+		throw;
 	}
 }
 
 void Robot::Look()
 {
-	Look(Map::direction::North);
-	Look(Map::direction::East);
-	Look(Map::direction::West);
-	Look(Map::direction::South);
+	std::vector<Map::direction> look = behaviour->Look();
+	for (int i = 0; i < look.size(); ++i) {
+		Look(look[i]);
+	}
 }
 
 void Robot::Compute()
 {
-
-	if (lookData[Map::direction::North] == 0) {
-		nextMove = Map::direction::North;
-	} 
-	else if (lookData[Map::direction::East] == 0) {
-		nextMove = Map::direction::East;
-	}
-	else if (lookData[Map::direction::South] == 0) {
-		nextMove = Map::direction::South;
-	}
-	else if (lookData[Map::direction::West] == 0) {
-		nextMove = Map::direction::West;
-	}
+	behaviour->Compute(lookData);
 }
 
 void Robot::Move()
 {
-	Move(nextMove);
+	std::pair<bool, Map::direction> moveData = behaviour->Move();
+	if (moveData.first) {
+		Move(moveData.second);
+	}
 }
 
 const std::_Atomic_uint Robot::getCount()
@@ -84,5 +80,5 @@ const std::_Atomic_uint Robot::getCount()
 
 unsigned int Robot::getID()
 {
-	return ID;
+	return id;
 }
