@@ -120,7 +120,7 @@ int Map::Move(int * position, direction direction)
 		throw new std::invalid_argument{ "Robot Move: invalid robot position, it's not a robot's position!" };
 	}
 
-	int newPos[3];
+	int newPos[3] = {0};
 
 	Transform(position, direction, newPos);
 

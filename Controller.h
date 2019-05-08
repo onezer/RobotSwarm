@@ -26,6 +26,7 @@ class Controller
 	int workerNum;
 	std::list<std::unique_ptr<Robot>>* robotList;
 	std::thread* workers;
+	std::thread* writer;
 	Map* map;
 	MapGenerator* mapGenerator;
 

@@ -18,7 +18,7 @@
 
 int main() { 
 
-	/*Controller* controller = Controller::Instance();
+	Controller* controller = Controller::Instance();
 	MapGenerator* mapGenerator = MapGenerator::Instance();
 	Map* map = Map::Instance();
 
@@ -30,7 +30,7 @@ int main() {
 	for (int x = 0; x < 1; ++x) {
 		map->Clean();
 
-		controller->StartSimulation(pos, Filling::Factory(), true, 300, 1);
+		controller->StartSimulation(pos, Filling::Factory());
 
 		controller->WaitForFinish();
 
@@ -39,9 +39,9 @@ int main() {
 	}
 	auto end = std::chrono::steady_clock::now();
 	
-	std::cout << "DONE\n" << "Simulation time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " milliseconds\n";*/
+	std::cout << "DONE\n" << "Simulation time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " milliseconds\n";
 
-	FileWriter* writer = FileWriter::Instance();
+	/*FileWriter* writer = FileWriter::Instance();
 	MapGenerator* mapGenerator = MapGenerator::Instance();
 	Map* nap = Map::Instance();
 
@@ -70,5 +70,5 @@ int main() {
 	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	writer->StopWriting();
 
-	writing.join();
+	writing.join();*/
 }

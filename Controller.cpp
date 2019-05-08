@@ -142,12 +142,14 @@ void Controller::AddRobot(int* position)
 			m_write.lock();
 			std::cout << "Terminated: Robot placed on obstacle\n";
 			m_write.unlock();
+			
 		}
 		else if (success == 2) {
 			TerminateSimulation();
 			m_write.lock();
 			std::cout << "Terminated: Robot placed on robot\n";
 			m_write.unlock();
+			
 		}
 	}
 	catch (std::invalid_argument e) {
@@ -165,6 +167,7 @@ void Controller::TerminateSimulation()
 		if (robotList[i].size())
 			robotList[i].clear();
 	}
+	FileWriter::Instance()->StopWriting();
 }
 
 void Controller::WaitForFinish()
@@ -172,6 +175,7 @@ void Controller::WaitForFinish()
 	for (int i = 0; i < workerNum; ++i) {
 		workers[i].join();
 	}
+	writer->join();
 }
 
 void Controller::StartSimulation(int* position, std::unique_ptr<iBehaviourFactory> bFactory, bool display, int wait, unsigned int threadNum)
@@ -206,6 +210,10 @@ void Controller::StartSimulation(int* position, std::unique_ptr<iBehaviourFactor
 		std::cout << "Worker #" << i << " created\n";
 		m_write.unlock();*/
 	}
+
+	FileWriter* writerInstance = FileWriter::Instance();
+
+	writer = new std::thread(&FileWriter::StartWriting, writerInstance, "example");
 }
 
 int Controller::getWorkerNum() const
