@@ -1,7 +1,7 @@
 #include "Map.h"
 #include<iostream>
-#include <cv.h>
-#include <highgui.h>
+//#include <cv.h>
+//#include <highgui.h>
 #include <string>
 #include"FileWriter.h"
 #include"Controller.h"
@@ -319,7 +319,7 @@ void Map::DisplayMap() const
 	}
 	std::cout << std::endl;
 	std::cout << std::endl;*/
-	
+	/*
 	IplImage* img = cvCreateImage(cvSize(size[0], size[1]), 8, 3);
 	IplImage* big = cvCreateImage(cvSize(1300,600), 8, 3);
 
@@ -364,7 +364,7 @@ void Map::DisplayMap() const
 	cvReleaseImage(&big);
 	cvReleaseImage(&redchannel);
 	cvReleaseImage(&greenchannel);
-	cvReleaseImage(&bluechannel);
+	cvReleaseImage(&bluechannel); */
 }
 
 Map::Map()

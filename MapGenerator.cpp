@@ -45,14 +45,14 @@ void MapGenerator::RandomFillMap() {
 		for (int y = 0; y < size[1]; ++y) {
 			for (int x = 0; x < size[0]; ++x) {
 				if (x == 0 || x == size[0] - 1 || y == 0 || y == size[1]) {
-					((Map::NodeObj**)mapArray)[x][y] = Map::nodeType::Obstacle;
+					((Map::NodeObj**)mapArray)[x][y].type = Map::nodeType::Obstacle;
 				}
 				else {
 					if (std::rand() % 100 < ratio) {
-						((Map::NodeObj**)mapArray)[x][y] = Map::nodeType::Free;
+						((Map::NodeObj**)mapArray)[x][y].type = Map::nodeType::Free;
 					}
 					else {
-						((Map::NodeObj**)mapArray)[x][y] = Map::nodeType::Obstacle;
+						((Map::NodeObj**)mapArray)[x][y].type = Map::nodeType::Obstacle;
 					}
 				}
 			}
@@ -69,9 +69,9 @@ void MapGenerator::SmoothMap()
 				int neighbourWallTiles = GetSurroundingWallCount(x, y);
 
 				if (neighbourWallTiles > 4)
-					((Map::NodeObj**)mapArray)[x][y] = Map::nodeType::Obstacle;
+					((Map::NodeObj**)mapArray)[x][y].type = Map::nodeType::Obstacle;
 				else if (neighbourWallTiles < 4)
-					((Map::NodeObj**)mapArray)[x][y] = Map::nodeType::Free;
+					((Map::NodeObj**)mapArray)[x][y].type = Map::nodeType::Free;
 
 			}
 		}
