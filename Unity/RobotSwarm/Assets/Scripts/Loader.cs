@@ -5,124 +5,22 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
 using System;
-
-[XmlRoot(ElementName = "size")]
-public class Size
-{
-    [XmlElement(ElementName = "x")]
-    public int X { get; set; }
-    [XmlElement(ElementName = "y")]
-    public int Y { get; set; }
-    [XmlElement(ElementName = "z")]
-    public int Z { get; set; }
-}
-
-[XmlRoot(ElementName = "node")]
-public class Node
-{
-    [XmlElement(ElementName = "x")]
-    public int X { get; set; }
-    [XmlElement(ElementName = "y")]
-    public int Y { get; set; }
-    [XmlElement(ElementName = "type")]
-    public string Type { get; set; }
-}
-
-[XmlRoot(ElementName = "map")]
-public class Map
-{
-    [XmlElement(ElementName = "size")]
-    public Size Size { get; set; }
-    [XmlElement(ElementName = "node")]
-    public List<Node> Node { get; set; }
-}
-
-[XmlRoot(ElementName = "iteration")]
-public class Iteration
-{
-    [XmlAttribute(AttributeName = "num")]
-    public int Num { get; set; }
-    [XmlElement(ElementName = "robot")]
-    public List<Robot> Robot { get; set; }
-}
-
-[XmlRoot(ElementName = "robot")]
-public class Robot
-{
-    [XmlElement(ElementName = "id")]
-    public int Id { get; set; }
-    [XmlElement(ElementName = "x")]
-    public int X { get; set; }
-    [XmlElement(ElementName = "y")]
-    public int Y { get; set; }
-    [XmlElement(ElementName = "z")]
-    public int Z { get; set; }
-    [XmlElement(ElementName = "type")]
-    public string Type { get; set; }
-}
-
-[XmlRoot(ElementName = "simulation")]
-public class Simulation
-{
-    [XmlElement(ElementName = "map")]
-    public Map Map { get; set; }
-    [XmlElement(ElementName = "iteration")]
-    public List<Iteration> Iteration { get; set; }
-    [XmlAttribute(AttributeName = "name")]
-    public string Name { get; set; }
-}
-
-public class Frame
-{
-    public int num;
-    public Dictionary<int,FrameRobot> robots;
-
-    public class FrameRobot
-    {
-        public int id;
-        public Vector3 position;
-
-        public FrameRobot(int id, Vector3 position)
-        {
-            this.id = id;
-            this.position = position;
-        }
-    }
-
-    
-
-    public Frame(int num)
-    {
-        robots = new Dictionary<int, FrameRobot>();
-        this.num = num;
-    }
-
-    public Frame(Frame other)
-    {
-        num = other.num + 1;
-        robots = new Dictionary<int, FrameRobot>(other.robots);
-    }
-
-    public void CreateRobot(int id, Vector3 position)
-    {
-        robots.Add(id, new FrameRobot(id, position));
-    }
-
-    public void MoveRobot(int id, Vector3 position)
-    {
-        robots[id] = new FrameRobot(id, position);
-    }
-}
-
+using UnityEditorInternal;
 
 
 public class Loader : MonoBehaviour
 {
-    public TextAsset Filename;
+    public string Filename;
     public Simulation Simulation;
     public GameObject Tile;
     public GameObject Obstacle;
     public GameObject RobotObj;
+    public float Delay;
+
+    float timer;
+    bool playing;
+
+    GameObject ButtonImage;
 
     Dictionary<int, Frame> Frames;
 
@@ -132,16 +30,128 @@ public class Loader : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Simulation = LoadSimulation(Filename.text);
+        Simulation = LoadSimulation(Filename);
         CreateMap();
         CreateFrames();
         currentFrame = 0;
         maxFrame = Frames.Count-1;
+        timer = 0;
+        DisplayFrame(currentFrame);
+
+        ButtonImage = GameObject.Find("Text");
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        timer += Time.deltaTime;
+
+        ManageHotkeys();
+        Autoplay();
+    }
+
+    void Autoplay()
+    {
+        if (playing == false) return;
+        if (timer >= Delay)
+        {
+            timer = 0;
+            if(currentFrame < maxFrame)
+            {
+                currentFrame++;
+                AnimateFrame();
+            }
+            else
+            {
+                playing = false;
+            }
+        }
+    }
+
+    void AnimateFrame()
+    {
+        GameObject[] robots = GameObject.FindGameObjectsWithTag("Robot");
+
+        Dictionary<int, GameObject> robotDictionary = new Dictionary<int, GameObject>();
+
+        Frame frame = Frames[currentFrame];
+        
+        foreach(GameObject robot in robots)
+        {
+            int id = robot.GetComponent<RobotId>().id;
+            robotDictionary.Add(id, robot);
+        }
+
+        foreach(KeyValuePair<int, FrameRobot> entry in frame.robots)
+        {
+            if (robotDictionary.ContainsKey(entry.Key))
+            {
+                MoveRobot(robotDictionary[entry.Key], entry.Value.position);
+            }
+            else
+            {
+                Instantiate(RobotObj, entry.Value.position, Quaternion.identity).GetComponent<RobotId>().id = entry.Key;
+            }
+        }
+    }
+
+    void MoveRobot(GameObject robot, Vector3 target)
+    {
+        StartCoroutine(MoveOverSeconds(robot, target, Delay));
+    }
+
+    public IEnumerator MoveOverSeconds(GameObject objectToMove, Vector3 end, float seconds)
+    {
+        if(objectToMove != null)
+        {
+            float elapsedTime = 0;
+            Vector3 startingPos = objectToMove.transform.position;
+            while (elapsedTime < seconds)
+            {
+                if (objectToMove != null)
+                {
+                    objectToMove.transform.position = Vector3.Lerp(startingPos, end, (elapsedTime / seconds));
+                    elapsedTime += Time.deltaTime;
+                }
+                yield return new WaitForEndOfFrame();
+            }
+            objectToMove.transform.position = end;
+        }
+    }
+
+    public void TogglePlay()
+    {
+        playing = !playing;
+    }
+
+    void ManageHotkeys()
+    {
+        if (Input.GetKeyDown("right"))
+        {
+            playing = false;
+            if (currentFrame < maxFrame)
+            {
+                currentFrame++;
+            }
+            DisplayFrame(currentFrame);
+        }
+        else if (Input.GetKeyDown("left"))
+        {
+            playing = false;
+            if (currentFrame > 0)
+            {
+                currentFrame--;
+            }
+            DisplayFrame(currentFrame);
+        }
+        else if (Input.GetKeyDown("space"))
+        {
+            TogglePlay();
+        }
     }
 
     Simulation LoadSimulation(string path)
     {
-        Debug.Log(path);
         try
         {
             XmlSerializer serializer = new XmlSerializer(typeof(Simulation));
@@ -150,7 +160,7 @@ public class Loader : MonoBehaviour
                 return serializer.Deserialize(stream) as Simulation;
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Debug.LogError("Exception loading simulation file: " + e.Message);
 
@@ -163,15 +173,15 @@ public class Loader : MonoBehaviour
         Map map = Simulation.Map;
         Size size = map.Size;
 
-        for(int x = 0; x < size.X; x++)
+        for (int x = 0; x < size.X; x++)
         {
-            for(int y = 0; y < size.Y; y++)
+            for (int y = 0; y < size.Y; y++)
             {
                 Instantiate(Tile, new Vector3(x, 0, y), Quaternion.identity);
             }
         }
 
-        foreach(Node node in map.Node)
+        foreach (Node node in map.Node)
         {
             if (node.Type.Contains("obstacle"))
             {
@@ -184,7 +194,7 @@ public class Loader : MonoBehaviour
     {
         Frames = new Dictionary<int, Frame>();
 
-        foreach(Iteration iteration in Simulation.Iteration)
+        foreach (Iteration iteration in Simulation.Iteration)
         {
             Frame frame;
             if (iteration.Num > 0)
@@ -195,8 +205,8 @@ public class Loader : MonoBehaviour
             {
                 frame = new Frame(iteration.Num);
             }
-            
-            foreach(Robot robot in iteration.Robot)
+
+            foreach (Robot robot in iteration.Robot)
             {
                 if (robot.Type.Contains("creation"))
                 {
@@ -205,7 +215,6 @@ public class Loader : MonoBehaviour
                 else if (robot.Type.Contains("move"))
                 {
                     frame.MoveRobot(robot.Id, new Vector3(robot.X, 0.5f, robot.Y));
-                    Debug.Log("move robot " + robot.Id);
                 }
             }
             Frames.Add(iteration.Num, frame);
@@ -215,36 +224,15 @@ public class Loader : MonoBehaviour
     void DisplayFrame(int num)
     {
         GameObject[] allrobot = GameObject.FindGameObjectsWithTag("Robot");
-        foreach(GameObject robot in allrobot)
+        foreach (GameObject robot in allrobot)
         {
             GameObject.Destroy(robot);
         }
 
         Frame currentFrame = Frames[num];
-        foreach(KeyValuePair<int, Frame.FrameRobot> entry in currentFrame.robots)
+        foreach (KeyValuePair<int, FrameRobot> entry in currentFrame.robots)
         {
-            Instantiate(RobotObj, entry.Value.position, Quaternion.identity);
-        }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKeyDown("right"))
-        {
-            if(currentFrame < maxFrame)
-            {
-                currentFrame++;
-            }
-            DisplayFrame(currentFrame);
-        }
-        else if (Input.GetKeyDown("left"))
-        {
-            if(currentFrame > 0)
-            {
-                currentFrame--;
-            }
-            DisplayFrame(currentFrame);
+            Instantiate(RobotObj, entry.Value.position, Quaternion.identity).GetComponent<RobotId>().id = entry.Key;
         }
     }
 }

@@ -60,11 +60,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\Coordinates.cs" />
+    <Compile Include="Assets\Robot\RobotId.cs" />
+    <Compile Include="Assets\Scripts\Frame.cs" />
+    <Compile Include="Assets\Scripts\FrameRobot.cs" />
     <Compile Include="Assets\Scripts\Loader.cs" />
-    <None Include="Assets\simulationfile.xml" />
+    <Compile Include="Assets\Scripts\XML.cs" />
     <None Include="Assets\example0.xml" />
-    <None Include="Assets\filename.txt" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>C:/Users/Viktor/Documents/Unity/RobotSwarm/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
