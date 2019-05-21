@@ -65,7 +65,7 @@
     <Compile Include="Assets\Scripts\FrameRobot.cs" />
     <Compile Include="Assets\Scripts\Loader.cs" />
     <Compile Include="Assets\Scripts\XML.cs" />
-    <None Include="Assets\example0.xml" />
+    <None Include="Assets\SINGLE0.xml" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>C:/Users/Viktor/Documents/Unity/RobotSwarm/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>

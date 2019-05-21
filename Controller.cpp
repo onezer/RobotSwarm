@@ -94,9 +94,19 @@ void Controller::worker(int id, std::list<std::unique_ptr<Robot>>* robotList)
 void Controller::iterationCB(unsigned int i)
 {
 	std::cout << "\nIteration: " << i << std::endl;
-	if (i % 2 == 1) {
-		Controller::Instance()->AddRobot(Controller::Instance()->robotStartPos);
+
+	if (map->SpaceNum() == 0) {
+		TerminateSimulation();
+		std::cout << "Map filled!"<< std::endl;
 	}
+
+	if (true|| i % 2 == 1) {
+		AddRobot(robotStartPos);
+	}
+	else {
+		map->PlaceNest(robotStartPos);
+	}
+
 
     //m_write.lock();
 	if (display) {
@@ -144,13 +154,13 @@ void Controller::AddRobot(int* position)
 			m_write.unlock();
 			
 		}
-		else if (success == 2) {
+		/*else if (success == 2) {
 			TerminateSimulation();
 			m_write.lock();
 			std::cout << "Terminated: Robot placed on robot\n";
 			m_write.unlock();
 			
-		}
+		}*/
 	}
 	catch (std::invalid_argument e) {
 		m_write.lock();
@@ -163,10 +173,6 @@ void Controller::AddRobot(int* position)
 void Controller::TerminateSimulation()
 {
 	terminate = true;
-	for (int i = 0; i < workerNum; ++i) {
-		if (robotList[i].size())
-			robotList[i].clear();
-	}
 	FileWriter::Instance()->StopWriting();
 }
 
@@ -178,7 +184,7 @@ void Controller::WaitForFinish()
 	writer->join();
 }
 
-void Controller::StartSimulation(int* position, std::unique_ptr<iBehaviourFactory> bFactory, bool display, int wait, unsigned int threadNum)
+void Controller::StartSimulation(std::unique_ptr<iBehaviourFactory> bFactory, std::string fileName, bool display, int wait, unsigned int threadNum)
 {
 	if (threadNum) {
 		workerNum = threadNum;
@@ -194,13 +200,21 @@ void Controller::StartSimulation(int* position, std::unique_ptr<iBehaviourFactor
 		robotList = new std::list<std::unique_ptr<Robot>>[workerNum];
 	}
 	
+	for (int i = 0; i < workerNum; ++i) {
+		if (robotList[i].size())
+			robotList[i].clear();
+	}
 
 	behaviourFactory = std::move(bFactory);
 	terminate = false;
 	this->display = display;
 	this->wait = wait;
 
-	std::memcpy(robotStartPos,position,map->getDimensions()*sizeof(int));
+	Coord position = mapGenerator->GetStartCoord();
+
+	robotStartPos[0] = position.tileX;
+	robotStartPos[1] = position.tileY;
+	robotStartPos[2] = position.tileZ;
 
 	currentIteration = new Iteration(0);
 
@@ -213,7 +227,7 @@ void Controller::StartSimulation(int* position, std::unique_ptr<iBehaviourFactor
 
 	FileWriter* writerInstance = FileWriter::Instance();
 
-	writer = new std::thread(&FileWriter::StartWriting, writerInstance, "example");
+	writer = new std::thread(&FileWriter::StartWriting, writerInstance, fileName);
 }
 
 int Controller::getWorkerNum() const
