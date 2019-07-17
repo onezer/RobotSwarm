@@ -12,6 +12,19 @@ The robots calculate their next move
 ### Move phase 
 Robots move
 
+### Features
+#### Multithreading
+At the start of the simulation we can specify how many threads we want it to run. The default is the number of logical processors.
+
+#### Procedural map generation
+The MapGenerator generates the map, with given seed (or random) and size.
+
+#### Parallel file saving
+The FileWriter works in a different thread, and writes the simulation details it gets in the buffer, in order to minimalize the memory usage of the program and also speed up the simulation.
+
+#### 3D visulalization in Unity
+The completed simulation is saved in an XML file and can be loaded to the Unity visualizer, where the whole simulation can be inspected and played as an animation.
+
 ### Classes
 #### Controller
 Singleton class, responsible for controlling the simulation (creating, managing threads; terminating simulation etc)
