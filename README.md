@@ -32,7 +32,7 @@ Every class that defines the robots' behaviour/algorithm must implement this int
 #### iBehaviourFactory
 The behaviour's factory class must implement this interface.
 
-#### XML file generation
+#### FileWriter
 The simulator generates an XML file parallel to the simulation, that can be used to visualize the simulation steps in Unity.
 This will help with debugging more complex robot algorithms, and visualizing 3D maps.
 
