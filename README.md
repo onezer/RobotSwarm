@@ -32,14 +32,11 @@ Every class that defines the robots' behaviour/algorithm must implement this int
 #### iBehaviourFactory
 The behaviour's factory class must implement this interface.
 
-### Incoming features
-#### XML file generation
-The simulator will generate an XML file parallel to the simulation, that can be used to visualize the simulation steps in Unity.
+#### FileWriter
+The simulator generates an XML file parallel to the simulation, that can be used to visualize the simulation steps in Unity.
 This will help with debugging more complex robot algorithms, and visualizing 3D maps.
 
-#### MapGenerator improvements
-The MapGenerator will define the starting position, and support multiple robot swarm problems.
-
+### Incoming features
 #### Robot communication
 Currently the robots have no supported communication methods, the behaviour class must implement it, with static variables/methods.
 
