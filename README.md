@@ -14,7 +14,7 @@ Robots move
 
 ## Features
 #### Multithreading
-At the start of the simulation we can specify how many threads we want it to run. The default is the number of logical processors.
+At the start of the simulation we can specify how many threads we want it to run on. The default is the number of logical processors.
 
 #### Procedural map generation
 The MapGenerator generates the map, with given seed (or random) and size.
