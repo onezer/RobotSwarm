@@ -8,6 +8,7 @@
 #include"iBehaviourFactory.h"
 #include"iBehaviour.h"
 #include"FileWriter.h"
+#include"Coord.h"
 
 //Singleton class that is repsonsible for controlling the simulation
 class Controller
@@ -59,7 +60,7 @@ public:
 	void AddRobot(int* position);
 	void TerminateSimulation();
 	void WaitForFinish();
-	void StartSimulation(int* position, std::unique_ptr<iBehaviourFactory> behaviourFactory, bool display=false, int wait=500, unsigned int threadNum = 0);
+	void StartSimulation(std::unique_ptr<iBehaviourFactory> behaviourFactory, std::string fileName, bool display=false, int wait=500, unsigned int threadNum = 0);
 	int getWorkerNum() const;
 	Iteration* currentIteration;
 };

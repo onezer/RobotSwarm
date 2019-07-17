@@ -106,7 +106,7 @@ void FileWriter::StartWriting(const std::string& name)
 
 	std::ofstream file;
 	file.open(fileName);
-	file << "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>\n";
+	file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 	file << "<simulation name=\"" + name + "\">\n";
 	
 	file << "<map>\n";

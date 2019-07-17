@@ -26,6 +26,7 @@ public:
 		nodeType GetType()const;
 		unsigned int GetId()const;
 	};
+	
 
 	static Map* Instance();
 	void SetMap(void* MapArray, mapType maptype, int* size);
@@ -38,6 +39,9 @@ public:
 	NodeObj Look(int* position, direction direction);
 	int PlaceRobot(const int* position, unsigned int);
 	int RemoveRobot(const int* position);
+	void PlaceNest(const int* position);
+
+	int SpaceNum();
 
 	void Clean();
 	void* Recycle(int* size); //Returning the allocated array pointer, if it's the same size as the parameter

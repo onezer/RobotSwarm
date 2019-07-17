@@ -15,6 +15,7 @@
 #include"Map.h"
 #include"FileWriter.h"
 #include<string>
+#include"SINGLE.hpp"
 
 int main() { 
 
@@ -22,15 +23,14 @@ int main() {
 	MapGenerator* mapGenerator = MapGenerator::Instance();
 	Map* map = Map::Instance();
 
-	int size[2] = { 50,40 };
-	int pos[2] = { 40,15 };
-	mapGenerator->GenerateMap(Map::mapType::twoD, size, false, 12335);
+	int size[2] = { 30,30 };
+	mapGenerator->GenerateMap(Map::mapType::twoD, size, true);
 
 	auto start = std::chrono::steady_clock::now();
 	for (int x = 0; x < 1; ++x) {
 		map->Clean();
 
-		controller->StartSimulation(pos, Filling::Factory());
+		controller->StartSimulation(SINGLE::Factory(), "SINGLE");
 
 		controller->WaitForFinish();
 

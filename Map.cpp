@@ -1,10 +1,11 @@
 #include "Map.h"
 #include<iostream>
-#include <cv.h>
-#include <highgui.h>
+//#include <cv.h>
+//#include <highgui.h>
 #include <string>
 #include"FileWriter.h"
 #include"Controller.h"
+#include"Coord.h"
 
 Map* Map::s_instance;
 
@@ -220,7 +221,7 @@ int Map::PlaceRobot(const int * position, unsigned int id)
 	}
 
 	try {
-		if (getNode(position).type != nodeType::Free) {
+		if (getNode(position).type != nodeType::Free && getNode(position).type != Nest) {
 			if (getNode(position).type == nodeType::Robot) {
 				
 				return 2;
@@ -267,6 +268,39 @@ int Map::RemoveRobot(const int * position)
 	return 0;
 }
 
+void Map::PlaceNest(const int * position)
+{
+	setNode(position, NodeObj(nodeType::Nest));
+}
+
+int Map::SpaceNum()
+{
+	int num = 0;
+	if (dimensions == 2) {
+		for (int y = 0; y < size[1]; ++y) {
+			for (int x = 0; x < size[0]; ++x) {
+				if (static_cast<Map::NodeObj**>(MapArray)[x][y].type == nodeType::Free) {
+					num++;
+				}
+			}
+		}
+	}
+	else if (dimensions == 3) {
+		for (int y = 0; y < size[1]; ++y) {
+			for (int x = 0; x < size[0]; ++x) {
+				for (int z = 0; z < size[2]; ++z) {
+					if (static_cast<Map::NodeObj***>(MapArray)[x][y][z].type == nodeType::Free) {
+						num++;
+					}
+				}
+
+			}
+		}
+	}
+
+	return num;
+}
+
 //Remove every robot from the map
 void Map::Clean()
 {
@@ -307,19 +341,20 @@ void * Map::Recycle(int * size)
 //Displaying every iteration with OpenCV
 void Map::DisplayMap() const
 {
-	/*for (int y = size[1] - 1; y >= 0; --y) {
+	for (int y = size[1] - 1; y >= 0; --y) {
 		for (int x = 0; x < size[0]; ++x) {
-			switch (((NodeObj**)MapArray)[x][y]) {
-			case 0: std::cout << "-"; break;
-			case 1: std::cout << "X"; break;
-			case 2: std::cout << "O"; break;
+			switch (((NodeObj**)MapArray)[x][y].type) {
+			case Map::nodeType::Free: std::cout << "-"; break;
+			case Map::nodeType::Obstacle: std::cout << "X"; break;
+			case Map::nodeType::Robot: std::cout << "O"; break;
+			case Map::nodeType::Nest: std::cout << "N"; break;
 			}
 		}
 		std::cout << std::endl;
 	}
 	std::cout << std::endl;
-	std::cout << std::endl;*/
-	
+	std::cout << std::endl;
+	/*
 	IplImage* img = cvCreateImage(cvSize(size[0], size[1]), 8, 3);
 	IplImage* big = cvCreateImage(cvSize(1300,600), 8, 3);
 
@@ -364,7 +399,7 @@ void Map::DisplayMap() const
 	cvReleaseImage(&big);
 	cvReleaseImage(&redchannel);
 	cvReleaseImage(&greenchannel);
-	cvReleaseImage(&bluechannel);
+	cvReleaseImage(&bluechannel); */
 }
 
 Map::Map()
@@ -422,23 +457,52 @@ void Map::Transform(int * position, direction direction, int* newPosition) const
 
 	memcpy(newPosition, position, dimensions * sizeof(int));
 
-	switch (direction) {
-	case North: newPosition[1] += 1; break;
-	case South: newPosition[1] -= 1; break;
-	case West: newPosition[0] -= 1; break;
-	case East: newPosition[0] += 1; break;
-	case Up: newPosition[2] += 1; break;
-	case Down: newPosition[2] -= 1; break;
-	case NorthWest: 
-		newPosition[1] += 1;
-		newPosition[0] -= 1;
-		break;
-	case NorthEast: newPosition[1] += 1; break;
-	case SouthWest: newPosition[1] -= 1; break;
-	case SouthEast:
-		newPosition[1] -= 1;
-		newPosition[0] += 1;
-		break;
+
+	if (maptype == mapType::twoD) {
+		switch (direction) {
+		case North: newPosition[1] += 1; break;
+		case South: newPosition[1] -= 1; break;
+		case West: newPosition[0] -= 1; break;
+		case East: newPosition[0] += 1; break;
+		case Up: newPosition[2] += 1; break;
+		case Down: newPosition[2] -= 1; break;
+		case NorthWest:
+			newPosition[1] += 1;
+			newPosition[0] -= 1;
+			break;
+		case NorthEast: 
+			newPosition[1] += 1;
+			newPosition[0] -= 1;
+			break;
+		case SouthWest: 
+			newPosition[1] -= 1;
+			newPosition[0] -= 1;
+			break;
+		case SouthEast:
+			newPosition[1] -= 1;
+			newPosition[0] += 1;
+			break;
+		}
+	}
+	else {
+		switch (direction) {
+		case North: newPosition[1] += 1; break;
+		case South: newPosition[1] -= 1; break;
+		case West: newPosition[0] -= 1; break;
+		case East: newPosition[0] += 1; break;
+		case Up: newPosition[2] += 1; break;
+		case Down: newPosition[2] -= 1; break;
+		case NorthWest:
+			newPosition[1] += 1;
+			newPosition[0] -= 1;
+			break;
+		case NorthEast: newPosition[1] += 1; break;
+		case SouthWest: newPosition[1] -= 1; break;
+		case SouthEast:
+			newPosition[1] -= 1;
+			newPosition[0] += 1;
+			break;
+		}
 	}
 }
 
@@ -466,6 +530,10 @@ bool Map::ValidDir(direction direction) const {
 		case South: return true; break;
 		case West: return true; break;
 		case East: return true; break;
+		case SouthWest: return true; break;
+		case SouthEast: return true; break;
+		case NorthWest: return true; break;
+		case NorthEast: return true; break;
 		default: return false; break;
 		}
 		break;
