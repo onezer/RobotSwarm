@@ -35,5 +35,4 @@
 *.vcxproj*
 
 /Build*
-/Debug*
 *.xml
