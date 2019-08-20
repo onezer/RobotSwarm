@@ -36,4 +36,5 @@
 
 /Build*
 /Debug*
+.vs*
 *.xml
